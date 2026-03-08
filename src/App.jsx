@@ -510,7 +510,7 @@ function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDele
         <StatCard label={((t.staked||'').replace('💸 ',''))} value={fAmt(totalStaked,cur)} icon="💸"/>
         <StatCard label={((t.returned||'').replace('💵 ',''))} value={fAmt(totalReturned,cur)} icon="💵" color={C.greenBright}/>
         <StatCard label={t.netProfit} value={(netProfit>=0?"+":"")+fAmt(netProfit,cur)} icon="📈" color={netProfit>=0?C.greenBright:C.redBright} trend={roi}/>
-        <StatCard label={t.dashWon.replace(" ✓","")} value={`${wr.toFixed(1)}%`} icon="🎯" color={wr>=50?C.greenBright:C.redBright}/>
+        <StatCard label={((t.won||'').replace(' ✓',''))} value={`${wr.toFixed(1)}%`} icon="🎯" color={wr>=50?C.greenBright:C.redBright}/>
         <StatCard label={t.pending} value={pending.length} icon="⏳" color="#38bdf8"/>
       </div>
       <h3 style={{color:C.white,fontWeight:700,fontSize:14,margin:"0 0 10px"}}>{t.inProgress} ({pending.length})</h3>
@@ -660,15 +660,15 @@ function Stats({bets,bankroll,initialBankroll,cur,t}){
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:8,marginBottom:13}}>
         <StatCard label={t.netProfit} value={(netProfit>=0?"+":"")+fAmt(netProfit,cur)} icon="💰" color={netProfit>=0?C.greenBright:C.redBright} trend={roi} spark={spark.length>2?spark:null}/>
         <StatCard label="ROI" value={fPct(roi)} icon="📈" color={roi>=0?C.greenBright:C.redBright}/>
-        <StatCard label={((t.dashWon||'').replace(' ✓',''))} value={`${wr.toFixed(1)}%`} icon="🎯" color={wr>=50?C.greenBright:C.redBright}/>
+        <StatCard label={((t.won||'').replace(' ✓',''))} value={`${wr.toFixed(1)}%`} icon="🎯" color={wr>=50?C.greenBright:C.redBright}/>
         <StatCard label={((t.staked||'').replace('💸 ',''))} value={fAmt(totalStaked,cur)} icon="💸"/>
         <StatCard label={((t.returned||'').replace('💵 ',''))} value={fAmt(totalReturned,cur)} icon="💵" color={C.greenBright}/>
         <StatCard label="Profit factor" value={isFinite(pf)?pf.toFixed(2):"∞"} icon="⚡" color={pf>=1?C.greenBright:C.redBright}/>
         <StatCard label="Max Drawdown" value={`${maxDD.toFixed(1)}%`} icon="📉" color={maxDD>20?C.redBright:C.orange}/>
         <StatCard label="Streak" value={`${streak} ${streakType==="won"?"✓":"✗"}`} icon="🔥" color={streakType==="won"?C.greenBright:C.redBright}/>
         <StatCard label={t.totalBets} value={bets.length} icon="📋"/>
-        <StatCard label={t.wonF} value={won.length} icon="✅" color={C.greenBright}/>
-        <StatCard label={t.lostF} value={lost.length} icon="❌" color={C.redBright}/>
+        <StatCard label={(t.wonF||'')} value={won.length} icon="✅" color={C.greenBright}/>
+        <StatCard label={(t.lostF||'')} value={lost.length} icon="❌" color={C.redBright}/>
         <StatCard label={t.pendingF} value={pending.length} icon="⏳" color="#38bdf8"/>
       </div>
       <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 15px",marginBottom:11}}>

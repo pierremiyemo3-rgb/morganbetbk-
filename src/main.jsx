@@ -20,10 +20,16 @@ if (!window.storage) {
   }
 }
 
+// ── Clear potentially corrupted data from old versions ───────────────────────
+try {
+  const keys = ['morganbet_v3', 'morganbet_v4'] // old storage keys
+  keys.forEach(k => localStorage.removeItem(k))
+} catch {}
+
 // ── Error Boundary ────────────────────────────────────────────────────────────
 class ErrorBoundary extends React.Component {
-  constructor(props) { super(props); this.state = { hasError: false, error: null } }
-  static getDerivedStateFromError(error) { return { hasError: true, error } }
+  constructor(props) { super(props); this.state = { hasError: false } }
+  static getDerivedStateFromError() { return { hasError: true } }
   componentDidCatch(error, info) { console.error('MorganbetBK error:', error, info) }
   render() {
     if (this.state.hasError) {
@@ -39,7 +45,7 @@ class ErrorBoundary extends React.Component {
               onClick={() => { localStorage.clear(); window.location.reload(); }}
               style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#f59e0b,#d97706)', color:'#000', fontWeight:700, fontSize:15, cursor:'pointer', fontFamily:'inherit' }}
             >
-              🔄 Réinitialiser
+              🔄 Réinitialiser et recommencer
             </button>
           </div>
         </div>
