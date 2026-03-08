@@ -507,8 +507,8 @@ function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDele
         </div>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:8,marginBottom:13}}>
-        <StatCard label={t.staked.replace("💸 ","")} value={fAmt(totalStaked,cur)} icon="💸"/>
-        <StatCard label={t.returned.replace("💵 ","")} value={fAmt(totalReturned,cur)} icon="💵" color={C.greenBright}/>
+        <StatCard label={((t.staked||'').replace('💸 ',''))} value={fAmt(totalStaked,cur)} icon="💸"/>
+        <StatCard label={((t.returned||'').replace('💵 ',''))} value={fAmt(totalReturned,cur)} icon="💵" color={C.greenBright}/>
         <StatCard label={t.netProfit} value={(netProfit>=0?"+":"")+fAmt(netProfit,cur)} icon="📈" color={netProfit>=0?C.greenBright:C.redBright} trend={roi}/>
         <StatCard label={t.dashWon.replace(" ✓","")} value={`${wr.toFixed(1)}%`} icon="🎯" color={wr>=50?C.greenBright:C.redBright}/>
         <StatCard label={t.pending} value={pending.length} icon="⏳" color="#38bdf8"/>
@@ -660,9 +660,9 @@ function Stats({bets,bankroll,initialBankroll,cur,t}){
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:8,marginBottom:13}}>
         <StatCard label={t.netProfit} value={(netProfit>=0?"+":"")+fAmt(netProfit,cur)} icon="💰" color={netProfit>=0?C.greenBright:C.redBright} trend={roi} spark={spark.length>2?spark:null}/>
         <StatCard label="ROI" value={fPct(roi)} icon="📈" color={roi>=0?C.greenBright:C.redBright}/>
-        <StatCard label={t.dashWon.replace(" ✓","").replace(" ✓","")} value={`${wr.toFixed(1)}%`} icon="🎯" color={wr>=50?C.greenBright:C.redBright}/>
-        <StatCard label={t.staked.replace("💸 ","")} value={fAmt(totalStaked,cur)} icon="💸"/>
-        <StatCard label={t.returned.replace("💵 ","")} value={fAmt(totalReturned,cur)} icon="💵" color={C.greenBright}/>
+        <StatCard label={((t.dashWon||'').replace(' ✓',''))} value={`${wr.toFixed(1)}%`} icon="🎯" color={wr>=50?C.greenBright:C.redBright}/>
+        <StatCard label={((t.staked||'').replace('💸 ',''))} value={fAmt(totalStaked,cur)} icon="💸"/>
+        <StatCard label={((t.returned||'').replace('💵 ',''))} value={fAmt(totalReturned,cur)} icon="💵" color={C.greenBright}/>
         <StatCard label="Profit factor" value={isFinite(pf)?pf.toFixed(2):"∞"} icon="⚡" color={pf>=1?C.greenBright:C.redBright}/>
         <StatCard label="Max Drawdown" value={`${maxDD.toFixed(1)}%`} icon="📉" color={maxDD>20?C.redBright:C.orange}/>
         <StatCard label="Streak" value={`${streak} ${streakType==="won"?"✓":"✗"}`} icon="🔥" color={streakType==="won"?C.greenBright:C.redBright}/>
@@ -737,7 +737,7 @@ function PeriodBilan({label,bets,cur,t,defaultOpen=false}){
             ))}
           </div>
           <div style={{marginBottom:10}}>
-            <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.muted,marginBottom:3}}><span>{t.wonF.replace(" ✓","")}</span><span style={{color:wr>=50?C.greenBright:C.redBright,fontWeight:700}}>{wr.toFixed(1)}%</span></div>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.muted,marginBottom:3}}><span>{((t.wonF||'').replace(' ✓',''))}</span><span style={{color:wr>=50?C.greenBright:C.redBright,fontWeight:700}}>{wr.toFixed(1)}%</span></div>
             <div style={{height:5,background:C.bg,borderRadius:5,overflow:"hidden"}}><div style={{height:"100%",width:wr+"%",background:wr>=50?"linear-gradient(90deg,#10b981,#34d399)":"linear-gradient(90deg,#ef4444,#f87171)",borderRadius:5}}/></div>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:5}}>
