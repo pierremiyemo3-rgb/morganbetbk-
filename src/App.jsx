@@ -959,17 +959,44 @@ export default function App(){
         {page==="settings"&&(isAdmin?<Settings bankroll={bankroll} onUpdateBankroll={handleUpdateBankroll} onResetRequest={handleResetRequest} onChangePin={p=>persist({...data,pin:p})} cur={cur} onCurChange={handleCurChange} lang={lang} onLangChange={handleLangChange} showToast={showToast} t={t}/>:<AccessDenied/>)}
       </main>
 
-      {/* Mobile bottom nav */}
-      <nav className="bot-nav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:90,background:"rgba(6,14,26,.97)",backdropFilter:"blur(16px)",borderTop:`1px solid ${C.border}`,display:"none",paddingBottom:"env(safe-area-inset-bottom,0)"}}>
-        {NAV.map(n=>(
-          <button key={n.id} onClick={()=>navTo(n.id)} style={{flex:1,padding:"8px 0 6px",background:"none",border:"none",color:page===n.id?C.gold:n.admin?(isAdmin?"#a78bfa":C.muted):C.muted,cursor:"pointer",fontFamily:"inherit",display:"flex",flexDirection:"column",alignItems:"center",gap:1,minWidth:0,position:"relative"}}>
+      {/* Mobile bottom bar with hamburger */}
+      <div className="bot-nav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:90,background:"rgba(6,14,26,.97)",backdropFilter:"blur(16px)",borderTop:`1px solid ${C.border}`,display:"none",paddingBottom:"env(safe-area-inset-bottom,0)",alignItems:"center",justifyContent:"space-around",padding:"8px 10px"}}>
+        {/* Quick access: 3 main pages */}
+        {[NAV[0],NAV[1],NAV[2]].map(n=>(
+          <button key={n.id} onClick={()=>{navTo(n.id);setMenuOpen(false);}} style={{flex:1,padding:"6px 2px",background:"none",border:"none",color:page===n.id?C.gold:C.muted,cursor:"pointer",fontFamily:"inherit",display:"flex",flexDirection:"column",alignItems:"center",gap:2,position:"relative"}}>
             <span style={{fontSize:22,lineHeight:1}}>{n.icon}</span>
-            <span style={{fontSize:9,fontWeight:page===n.id?700:400,marginTop:1,color:"inherit"}}>{n.short||n.label}</span>
-            {n.admin&&!isAdmin&&<span style={{position:"absolute",top:4,right:"calc(50% - 14px)",fontSize:8,opacity:.6}}>🔒</span>}
-            {page===n.id&&<div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",width:20,height:2,background:C.gold,borderRadius:2}}/>}
+            <span style={{fontSize:9,fontWeight:page===n.id?700:400,color:"inherit"}}>{n.short||n.label}</span>
+            {page===n.id&&<div style={{position:"absolute",bottom:-2,left:"50%",transform:"translateX(-50%)",width:18,height:2,background:C.gold,borderRadius:2}}/>}
           </button>
         ))}
-      </nav>
+        {/* Hamburger menu button */}
+        <button onClick={()=>setMenuOpen(o=>!o)} style={{flex:1,padding:"6px 2px",background:"none",border:"none",color:menuOpen?C.gold:C.muted,cursor:"pointer",fontFamily:"inherit",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+          <span style={{fontSize:22,lineHeight:1}}>{menuOpen?"✕":"☰"}</span>
+          <span style={{fontSize:9,color:"inherit"}}>Menu</span>
+        </button>
+      </div>
+
+      {/* Mobile slide-up menu */}
+      {menuOpen&&<div style={{position:"fixed",inset:0,zIndex:89,background:"rgba(0,0,0,.6)",backdropFilter:"blur(4px)"}} onClick={()=>setMenuOpen(false)}/>}
+      <div className="bot-nav" style={{position:"fixed",bottom:menuOpen?60:"-100%",left:0,right:0,zIndex:89,background:"rgba(6,14,26,.99)",backdropFilter:"blur(20px)",borderTop:`2px solid ${C.goldBorder}`,borderRadius:"20px 20px 0 0",display:"none",flexDirection:"column",padding:"16px 16px calc(env(safe-area-inset-bottom,0px) + 16px)",gap:8,transition:"bottom .3s cubic-bezier(.4,0,.2,1)"}}>
+        <div style={{textAlign:"center",marginBottom:4}}>
+          <div style={{width:36,height:3,background:C.border2,borderRadius:3,margin:"0 auto 10px"}}/>
+          <div style={{color:C.muted,fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase"}}>Navigation</div>
+        </div>
+        {NAV.slice(2).map(n=>(
+          <button key={n.id} onClick={()=>{navTo(n.id);setMenuOpen(false);}} style={{width:"100%",padding:"13px 16px",background:page===n.id?C.goldDim:C.bg2,border:`1px solid ${page===n.id?C.goldBorder:C.border}`,borderRadius:12,color:page===n.id?C.gold:n.admin?(isAdmin?"#a78bfa":C.muted):C.white,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:12,fontSize:15,fontWeight:page===n.id?700:500,textAlign:"left"}}>
+            <span style={{fontSize:20,width:28,textAlign:"center"}}>{n.icon}</span>
+            <span style={{flex:1}}>{n.label}</span>
+            {n.admin&&!isAdmin&&<span style={{fontSize:11,color:C.muted}}>🔒</span>}
+            {page===n.id&&<span style={{fontSize:11,color:C.gold}}>●</span>}
+          </button>
+        ))}
+        {isAdmin&&(
+          <button onClick={()=>{setIsAdmin(false);setMenuOpen(false);}} style={{width:"100%",padding:"11px 16px",background:"transparent",border:`1px solid rgba(139,92,246,.2)`,borderRadius:12,color:"#a78bfa",cursor:"pointer",fontFamily:"inherit",fontSize:13,fontWeight:600,marginTop:4}}>
+            🔐 Déconnexion admin
+          </button>
+        )}
+      </div>
     </div>
   );
 }
