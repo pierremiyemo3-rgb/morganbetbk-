@@ -838,6 +838,7 @@ export default function App(){
   const [confirmCfg,setConfirmCfg]=useState(null);
   const confirmCb=useRef(null);
   const [toast,setToast]=useState({msg:"",type:""});
+  const [menuOpen,setMenuOpen]=useState(false);
   const t=T[lang];
 
   const showToast=(msg,type="info")=>setToast({msg,type});
@@ -862,7 +863,7 @@ export default function App(){
     if(entered===(data?.pin||DEFAULT_PIN)){ setIsAdmin(true); setShowPin(false); if(pendingPage){setPage(pendingPage);setPendingPage(null);} showToast(t.tAdmin,"success"); }
     else if(onFail)onFail();
   };
-  const navTo=p=>{ if(p==="newbet"||p==="settings"){if(isAdmin){setPage(p);return;} setPendingPage(p);setShowPin(true);return;} setPage(p); };
+  const navTo=p=>{ setMenuOpen(false); if(p==="newbet"||p==="settings"){if(isAdmin){setPage(p);return;} setPendingPage(p);setShowPin(true);return;} setPage(p); };
   const handleSetup=(eur,pin)=>{ persist({bankroll:{eur,initial:eur,setup:true},bets:[],pin,lang,cur}); setIsAdmin(true); setPage("dashboard"); };
   const handleAddBet=bet=>{ persist({...data,bets:[bet,...(data.bets||[])]}); setPage("dashboard"); };
   const handleStatus=(id,status)=>{
