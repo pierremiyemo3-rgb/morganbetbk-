@@ -66,6 +66,10 @@ const T = {
     eStake:"Mise invalide", eTeam:"Équipe requise", eCote:"Cote requise",
     initialBank:"Bankroll initiale en",
     vsCapital:"vs capital initial",
+    goalLabel:"🎯 Objectif bankroll",
+    goalSet:"Définir un objectif",
+    goalProgress:"Progression vers l'objectif",
+    goalReached:"🎉 Objectif atteint !",
   },
   en: {
     tagline: "Every bet counts.",
@@ -122,6 +126,10 @@ const T = {
     eStake:"Invalid stake", eTeam:"Team required", eCote:"Odds required",
     initialBank:"Initial bankroll in",
     vsCapital:"vs initial capital",
+    goalLabel:"🎯 Bankroll goal",
+    goalSet:"Set a goal",
+    goalProgress:"Progress towards goal",
+    goalReached:"🎉 Goal reached!",
   },
   it: {
     tagline: "Ogni scommessa conta.",
@@ -178,6 +186,10 @@ const T = {
     eStake:"Importo non valido", eTeam:"Squadra richiesta", eCote:"Quota richiesta",
     initialBank:"Bankroll iniziale in",
     vsCapital:"vs capitale iniziale",
+    goalLabel:"🎯 Obiettivo bankroll",
+    goalSet:"Imposta un obiettivo",
+    goalProgress:"Progressione verso l'obiettivo",
+    goalReached:"🎉 Obiettivo raggiunto!",
   },
 };
 
@@ -386,12 +398,36 @@ function Logo({big,onClick}){
 }
 
 /* ═══════════════════════ DEMO MODAL ═══════════════════════ */
-function DemoModal({onClose}){
+function DemoModal({onClose,lang}){
   const [slide,setSlide]=useState(0);
+  const DEMO_TEXTS={
+    fr:[
+      ["📊 Dashboard en temps réel","Suivez votre bankroll, profit NET, ROI et taux de réussite en un coup d'œil. Graphique d'évolution inclus."],
+      ["➕ Ajout de paris facile","Simple ou combiné. Choisissez parmi 67 marchés, entrez vos équipes et la cote. Calcul automatique du gain potentiel."],
+      ["📅 Bilans automatiques","Chaque pari est automatiquement classé par semaine et par mois. Profit NET, ROI et taux de réussite par période."],
+      ["🌍 Multi-langue & Multi-devise","Interface disponible en Français, English et Italiano. Toutes les sommes affichées en EUR et XAF simultanément."],
+      ["🔐 Mode Admin & Public","Partagez l'URL publiquement — vos stats sont visibles par tous. Seul vous pouvez modifier avec votre code PIN."],
+    ],
+    en:[
+      ["📊 Real-time Dashboard","Track your bankroll, net profit, ROI and win rate at a glance. Bankroll evolution chart included."],
+      ["➕ Easy bet entry","Single or accumulator. Choose from 67 markets, enter teams and odds. Potential gain calculated automatically."],
+      ["📅 Automatic reports","Every bet is automatically sorted by week and month. Net profit, ROI and win rate per period."],
+      ["🌍 Multi-language & currency","Available in French, English and Italian. All amounts shown in EUR and XAF simultaneously."],
+      ["🔐 Admin & Public mode","Share the URL publicly — your stats are visible to all. Only you can edit with your PIN code."],
+    ],
+    it:[
+      ["📊 Dashboard in tempo reale","Monitora il tuo bankroll, profitto netto, ROI e tasso di successo. Include grafico di evoluzione."],
+      ["➕ Inserimento scommesse facile","Singola o multipla. Scegli tra 67 mercati, inserisci le squadre e la quota. Guadagno potenziale calcolato automaticamente."],
+      ["📅 Report automatici","Ogni scommessa è classificata automaticamente per settimana e mese. Profitto netto, ROI e tasso di vincita per periodo."],
+      ["🌍 Multilingua & multivaluta","Disponibile in Francese, Inglese e Italiano. Tutti gli importi mostrati in EUR e XAF simultaneamente."],
+      ["🔐 Modalità Admin & Pubblica","Condividi l'URL pubblicamente — le tue stats sono visibili a tutti. Solo tu puoi modificare con il tuo PIN."],
+    ],
+  };
+  const texts=DEMO_TEXTS[lang]||DEMO_TEXTS.fr;
   const slides=[
     {
-      title:"📊 Dashboard en temps réel",
-      desc:"Suivez votre bankroll, profit NET, ROI et taux de réussite en un coup d'œil. Graphique d'évolution inclus.",
+      title:texts[0][0],
+      desc:texts[0][1],
       preview:(
         <div style={{background:"#0b1929",borderRadius:12,padding:14,fontSize:11}}>
           <div style={{color:"#f59e0b",fontWeight:800,fontSize:20,marginBottom:4}}>€1 250.00</div>
@@ -408,8 +444,8 @@ function DemoModal({onClose}){
       )
     },
     {
-      title:"➕ Ajout de paris facile",
-      desc:"Simple ou combiné. Choisissez parmi 67 marchés, entrez vos équipes et la cote. Calcul automatique du gain potentiel.",
+      title:texts[1][0],
+      desc:texts[1][1],
       preview:(
         <div style={{background:"#0b1929",borderRadius:12,padding:14,fontSize:11}}>
           <div style={{display:"flex",gap:6,marginBottom:10}}>
@@ -450,8 +486,8 @@ function DemoModal({onClose}){
       )
     },
     {
-      title:"🌍 Multi-langue & Multi-devise",
-      desc:"Interface disponible en Français, English et Italiano. Toutes les sommes affichées en EUR et XAF simultanément.",
+      title:texts[3][0],
+      desc:texts[3][1],
       preview:(
         <div style={{background:"#0b1929",borderRadius:12,padding:14}}>
           <div style={{display:"flex",gap:6,marginBottom:14}}>
@@ -467,8 +503,8 @@ function DemoModal({onClose}){
       )
     },
     {
-      title:"🔐 Mode Admin & Public",
-      desc:"Partagez l'URL publiquement — vos stats sont visibles par tous. Seul vous pouvez modifier avec votre code PIN.",
+      title:texts[4][0],
+      desc:texts[4][1],
       preview:(
         <div style={{background:"#0b1929",borderRadius:12,padding:14}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
@@ -514,10 +550,15 @@ function DemoModal({onClose}){
         </div>
         {/* Nav */}
         <div style={{display:"flex",gap:8,padding:"0 20px 20px"}}>
-          <button onClick={()=>setSlide(s=>Math.max(0,s-1))} disabled={slide===0} style={{flex:1,padding:"11px",borderRadius:10,border:"1px solid rgba(255,255,255,.1)",background:"transparent",color:slide===0?"#2d3748":"#eef2f7",fontWeight:700,cursor:slide===0?"default":"pointer",fontFamily:"inherit",fontSize:14}}>← Précédent</button>
-          {slide<slides.length-1
-            ?<button onClick={()=>setSlide(s=>s+1)} style={{flex:1,padding:"11px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#000",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:14}}>Suivant →</button>
-            :<button onClick={onClose} style={{flex:1,padding:"11px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:14}}>C'est parti ! 🚀</button>
+          {["fr","en","it"].indexOf(lang)>=0?(
+            <>
+            <button onClick={()=>setSlide(s=>Math.max(0,s-1))} disabled={slide===0} style={{flex:1,padding:"11px",borderRadius:10,border:"1px solid rgba(255,255,255,.1)",background:"transparent",color:slide===0?"#2d3748":"#eef2f7",fontWeight:700,cursor:slide===0?"default":"pointer",fontFamily:"inherit",fontSize:14}}>{lang==="it"?"← Precedente":lang==="en"?"← Previous":"← Précédent"}</button>
+            {slide<slides.length-1
+              ?<button onClick={()=>setSlide(s=>s+1)} style={{flex:1,padding:"11px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#000",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:14}}>{lang==="it"?"Successivo →":lang==="en"?"Next →":"Suivant →"}</button>
+              :<button onClick={onClose} style={{flex:1,padding:"11px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:14}}>{lang==="it"?"Iniziamo! 🚀":lang==="en"?"Let's go! 🚀":"C'est parti ! 🚀"}</button>
+            }
+            </>
+          ):null
           }
         </div>
       </div>
@@ -531,7 +572,7 @@ function Landing({t,lang,setLang,onEnter}){
   const stats=[["98%","Précision des stats"],["67","Marchés disponibles"],["3","Devises supportées"]];
   return(
     <div style={{minHeight:"100vh",background:"#04080f",overflowX:"hidden",fontFamily:"'Segoe UI',system-ui,sans-serif"}}>
-      {showDemo&&<DemoModal onClose={()=>setShowDemo(false)}/>}
+      {showDemo&&<DemoModal onClose={()=>setShowDemo(false)} lang={lang}/>}
       {/* Background */}
       <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}>
         <div style={{position:"absolute",width:"70vw",height:"70vw",maxWidth:700,maxHeight:700,borderRadius:"50%",background:"radial-gradient(circle,rgba(245,158,11,.07) 0%,transparent 65%)",top:"-20%",right:"-15%"}}/>
@@ -659,8 +700,27 @@ function Setup({t,onSave}){
 /* ═══════════════════════ BET CARD ═══════════════════════ */
 function BetCard({bet,isAdmin,onStatus,onDelete,onDuplicate,cur,t}){
   const [open,setOpen]=useState(false);
+  const [swipeX,setSwipeX]=useState(0);
+  const startX=useRef(0);
+  const handleTouchStart=e=>{ startX.current=e.touches[0].clientX; };
+  const handleTouchEnd=e=>{
+    const diff=e.changedTouches[0].clientX-startX.current;
+    if(bet.status!=="pending"||!isAdmin)return;
+    if(diff>60){onStatus(bet.id,"won");setSwipeX(0);}
+    else if(diff<-60){onStatus(bet.id,"lost");setSwipeX(0);}
+    else setSwipeX(0);
+  };
+  const handleTouchMove=e=>{ if(bet.status==="pending"&&isAdmin)setSwipeX(e.touches[0].clientX-startX.current); };
+  const swipeCol=swipeX>30?"rgba(16,185,129,.15)":swipeX<-30?"rgba(239,68,68,.15)":"transparent";
   return(
-    <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:13,padding:"12px 14px"}}>
+    <div style={{position:"relative",overflow:"hidden",borderRadius:13}}>
+      {bet.status==="pending"&&isAdmin&&swipeX!==0&&(
+        <div style={{position:"absolute",inset:0,background:swipeCol,display:"flex",alignItems:"center",justifyContent:swipeX>0?"flex-start":"flex-end",padding:"0 16px",pointerEvents:"none",zIndex:0,borderRadius:13}}>
+          <span style={{fontSize:20}}>{swipeX>30?"✓ Gagné":"✗ Perdu"}</span>
+        </div>
+      )}
+    <div onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+      style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:13,padding:"12px 14px",position:"relative",zIndex:1,transform:`translateX(${Math.max(-80,Math.min(80,swipeX))}px)`,transition:swipeX===0?"transform .3s":"none"}}>
       <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:5}}>
@@ -716,11 +776,12 @@ function BetCard({bet,isAdmin,onStatus,onDelete,onDuplicate,cur,t}){
         </button>
       </div>
     </div>
+    </div>
   );
 }
 
 /* ═══════════════════════ DASHBOARD ═══════════════════════ */
-function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDelete,onDuplicate,cur,t,onCalc}){
+function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDelete,onDuplicate,cur,t,onCalc,goal,onSetGoal}){
   const {won,resolved,totalStaked,netProfit,roi,wr}=calcPeriod(bets);
   const pending=bets.filter(b=>b.status==="pending");
   const totalReturned=won.reduce((a,b)=>a+b.potentialGainEur,0);
@@ -772,6 +833,8 @@ function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDele
           {spark.length>2&&<div style={{opacity:.8}}><Sparkline data={spark} color={spark[spark.length-1]>=spark[0]?C.green:C.red} height={50}/></div>}
         </div>
       </div>
+      <GoalWidget bankroll={bankroll} goal={goal} onSetGoal={onSetGoal} cur={cur} t={t} isAdmin={isAdmin}/>
+      <MaxStreakWidget bets={bets}/>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:8,marginBottom:13}}>
         <StatCard label={((t.staked||'').replace('💸 ',''))} value={fAmt(totalStaked,cur)} icon="💸"/>
         <StatCard label={((t.returned||'').replace('💵 ',''))} value={fAmt(totalReturned,cur)} icon="💵" color={C.greenBright}/>
@@ -779,7 +842,10 @@ function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDele
         <StatCard label={((t.won||'').replace(' ✓',''))} value={`${wr.toFixed(1)}%`} icon="🎯" color={wr>=50?C.greenBright:C.redBright}/>
         <StatCard label={t.pending} value={pending.length} icon="⏳" color="#38bdf8"/>
       </div>
-      <h3 style={{color:C.white,fontWeight:700,fontSize:14,margin:"0 0 10px"}}>{t.inProgress} ({pending.length})</h3>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+        <h3 style={{color:C.white,fontWeight:700,fontSize:14,margin:0}}>{t.inProgress} ({pending.length})</h3>
+        {isAdmin&&pending.length>0&&<span style={{color:C.muted,fontSize:10}}>← Glisser: ✗ Perdu · Gagné ✓ →</span>}
+      </div>
       {pending.length===0
         ?<div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:13,padding:"22px",textAlign:"center",color:C.muted}}>{t.noPending}{isAdmin&&<span onClick={()=>onPage("newbet")} style={{color:C.gold,cursor:"pointer"}}>{t.addHere}</span>}</div>
         :<div style={{display:"flex",flexDirection:"column",gap:8}}>
@@ -792,7 +858,7 @@ function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDele
 }
 
 /* ═══════════════════════ NEW BET ═══════════════════════ */
-function NewBet({bankroll,onAdd,onBack,showToast,t,lang}){
+function NewBet({bankroll,onAdd,onBack,showToast,t,lang,bets}){
   const [type,setType]=useState("simple"), [sels,setSels]=useState([{id:1,home:"",away:"",mkt:"gg",cote:""}]);
   const [stake,setStake]=useState(""), [stkCur,setStkCur]=useState("EUR");
   const [name,setName]=useState(""), [note,setNote]=useState("");
@@ -833,8 +899,8 @@ function NewBet({bankroll,onAdd,onBack,showToast,t,lang}){
             {type==="combine"&&sels.length>1&&<button onClick={()=>setSels(ss=>ss.filter(x=>x.id!==s.id))} style={{background:C.redDim,border:"none",borderRadius:6,padding:"3px 9px",color:C.redBright,cursor:"pointer",fontSize:11}}>✕</button>}
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-            <Inp label={t.home} placeholder="PSG" value={s.home} onChange={e=>{upd(s.id,"home",e.target.value);setErrs(x=>({...x,[`h${idx}`]:null}));}} err={errs[`h${idx}`]}/>
-            <Inp label={t.away} placeholder="Lyon" value={s.away} onChange={e=>{upd(s.id,"away",e.target.value);setErrs(x=>({...x,[`a${idx}`]:null}));}} err={errs[`a${idx}`]}/>
+            <TeamInput label={t.home} value={s.home} onChange={v=>{upd(s.id,"home",v);setErrs(x=>({...x,[`h${idx}`]:null}));}} bets={bets||[]} err={errs[`h${idx}`]}/>
+            <TeamInput label={t.away} value={s.away} onChange={v=>{upd(s.id,"away",v);setErrs(x=>({...x,[`a${idx}`]:null}));}} bets={bets||[]} err={errs[`a${idx}`]}/>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:8}}>
             <Slct label={t.market} value={s.mkt} onChange={e=>upd(s.id,"mkt",e.target.value)}>{mkts.map(m=><option key={m.id} value={m.id}>{m.icon} {m.label}</option>)}</Slct>
@@ -965,6 +1031,7 @@ function Stats({bets,bankroll,initialBankroll,cur,t}){
         <h4 style={{color:C.white,fontWeight:700,margin:"0 0 11px",fontSize:14}}>📈 Évolution de la bankroll</h4>
         <BankrollChart bets={bets} initialBankroll={initialBankroll} cur={cur}/>
       </div>
+      <PeriodComparison bets={bets} cur={cur} t={t}/>
       <BestDayAnalysis bets={bets} cur={cur}/>
       {Object.keys(mkts).length>0&&(
         <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 15px"}}>
@@ -1067,7 +1134,7 @@ function Bilan({bets,cur,t}){
 }
 
 /* ═══════════════════════ SETTINGS ═══════════════════════ */
-function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCurChange,lang,onLangChange,lightMode,onToggleLight,showToast,t}){
+function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCurChange,lang,onLangChange,lightMode,onToggleLight,onExport,notifGranted,setNotifGranted,showToast,t}){
   const [amt,setAmt]=useState(""), [amtCur,setAmtCur]=useState("EUR"), [mode,setMode]=useState("set");
   const [np,setNp]=useState(""), [np2,setNp2]=useState(""), [pe,setPe]=useState({});
   const apply=()=>{ const n=parseFloat(amt); if(!n||n<=0)return; onUpdateBankroll(amtCur==="EUR"?n:n/XAF,mode); setAmt(""); showToast(t.tBank,"success"); };
@@ -1075,6 +1142,31 @@ function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCu
   return(
     <div style={{maxWidth:580,margin:"0 auto",padding:"14px 12px"}}>
       <h2 style={{color:C.white,fontWeight:900,fontSize:"clamp(16px,4vw,22px)",margin:"0 0 12px"}}>{t.settingsTitle}</h2>
+      <div style={{background:notifGranted?"rgba(16,185,129,.08)":"rgba(245,158,11,.08)",border:`1px solid ${notifGranted?C.green:C.goldBorder}`,borderRadius:14,padding:"12px 15px",marginBottom:9}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+          <div>
+            <div style={{color:notifGranted?C.greenBright:C.gold,fontWeight:700,fontSize:13}}>🔔 Notifications push</div>
+            <div style={{color:C.muted,fontSize:11,marginTop:2}}>
+              {notifGranted?"Activées — tu recevras des alertes automatiques":"Désactivées — active pour recevoir des rappels"}
+            </div>
+          </div>
+          {!notifGranted&&(
+            <button onClick={async()=>{const ok=await requestNotifPermission();setNotifGranted(ok);if(ok)showToast("Notifications activées 🔔","success");}} style={{padding:"8px 14px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#000",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>
+              Activer 🔔
+            </button>
+          )}
+          {notifGranted&&<span style={{fontSize:20}}>✅</span>}
+        </div>
+        {notifGranted&&(
+          <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:4}}>
+            {[["⏳","Paris en attente +24h"],["🚨","Alerte perte hebdomadaire >10%"],["🎉","Objectif bankroll atteint"],["📊","Résumé quotidien (dès 8h)"]].map(([i,l],k)=>(
+              <div key={k} style={{display:"flex",alignItems:"center",gap:8,fontSize:12,color:C.sub}}>
+                <span>{i}</span><span>{l}</span><span style={{marginLeft:"auto",color:C.greenBright}}>✓</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 15px",marginBottom:9}}>
         <h4 style={{color:C.white,margin:"0 0 9px"}}>🌍 Langue / Language</h4>
         <LangSwitcher lang={lang} setLang={onLangChange}/>
@@ -1101,6 +1193,12 @@ function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCu
         <h4 style={{color:C.white,margin:"0 0 9px"}}>🎨 Apparence</h4>
         <button onClick={onToggleLight} style={{width:"100%",padding:"11px",borderRadius:10,border:`2px solid ${lightMode?"#38bdf8":C.border}`,background:lightMode?"rgba(56,189,248,.1)":"transparent",color:lightMode?"#38bdf8":C.sub,fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:13}}>
           {lightMode?"☀️ Mode clair (actif)":"🌙 Mode sombre (actif)"}
+        </button>
+      </div>
+      <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 15px",marginBottom:9}}>
+        <h4 style={{color:C.white,margin:"0 0 9px"}}>📤 Export</h4>
+        <button onClick={onExport} style={{width:"100%",padding:"11px",borderRadius:10,border:`1px solid ${C.goldBorder}`,background:C.goldDim,color:C.gold,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
+          📊 Exporter tous les paris (CSV/Excel)
         </button>
       </div>
       <div style={{background:C.bg2,border:"1px solid rgba(239,68,68,.2)",borderRadius:14,padding:"13px 15px"}}>
@@ -1245,6 +1343,269 @@ function BestDayAnalysis({bets,cur}){
   );
 }
 
+
+/* ═══════════════════════ FLOATING ADD BUTTON ═══════════════════════ */
+function FloatingAddBtn({onClick,isAdmin,showPin}){
+  if(!isAdmin)return(
+    <button onClick={showPin} style={{position:"fixed",bottom:80,right:16,zIndex:80,width:52,height:52,borderRadius:"50%",background:"linear-gradient(135deg,rgba(245,158,11,.3),rgba(245,158,11,.1))",border:"2px dashed rgba(245,158,11,.4)",color:"#f59e0b",fontSize:22,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}>➕</button>
+  );
+  return(
+    <button onClick={onClick} style={{position:"fixed",bottom:80,right:16,zIndex:80,width:56,height:56,borderRadius:"50%",background:"linear-gradient(135deg,#f59e0b,#d97706)",border:"none",color:"#000",fontSize:24,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(245,158,11,.4)",fontWeight:900}}>➕</button>
+  );
+}
+
+/* ═══════════════════════ GOAL WIDGET ═══════════════════════ */
+function GoalWidget({bankroll,goal,onSetGoal,cur,t,isAdmin}){
+  const [editing,setEditing]=useState(false);
+  const [val,setVal]=useState("");
+  const [gCur,setGCur]=useState("EUR");
+  if(!goal&&!isAdmin)return null;
+  const pct=goal>0?Math.min(100,bankroll/goal*100):0;
+  const reached=goal>0&&bankroll>=goal;
+  const save=()=>{ const n=parseFloat(val); if(n>0){onSetGoal(gCur==="EUR"?n:n/655.957);} setEditing(false); setVal(""); };
+  return(
+    <div style={{background:reached?"rgba(16,185,129,.08)":C.bg2,border:`1px solid ${reached?C.green:C.goldBorder}`,borderRadius:14,padding:"12px 15px",marginBottom:11}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+        <span style={{color:C.gold,fontWeight:700,fontSize:13}}>{t.goalLabel}</span>
+        {isAdmin&&<button onClick={()=>setEditing(e=>!e)} style={{background:"none",border:"none",color:C.muted,fontSize:11,cursor:"pointer"}}>{editing?"✕":goal?"✏️ Modifier":"+ Définir"}</button>}
+      </div>
+      {editing&&(
+        <div style={{marginBottom:10}}>
+          <div style={{display:"flex",gap:6,marginBottom:7}}>
+            {["EUR","XAF"].map(c=><button key={c} onClick={()=>setGCur(c)} style={{flex:1,padding:"6px",borderRadius:8,border:`1.5px solid ${gCur===c?C.gold:C.border}`,background:gCur===c?C.goldDim:"transparent",color:gCur===c?C.gold:C.muted,fontWeight:700,cursor:"pointer",fontSize:12,fontFamily:"inherit"}}>{c}</button>)}
+          </div>
+          <div style={{display:"flex",gap:6}}>
+            <input type="number" value={val} onChange={e=>setVal(e.target.value)} placeholder={gCur==="EUR"?"2000":"1 312 000"} style={{flex:1,background:C.bg3,border:`1px solid ${C.border2}`,borderRadius:9,padding:"9px 11px",color:C.white,fontSize:13,fontFamily:"inherit",outline:"none"}}/>
+            <button onClick={save} style={{padding:"9px 14px",borderRadius:9,border:"none",background:C.gold,color:"#000",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:13}}>OK</button>
+          </div>
+        </div>
+      )}
+      {goal>0&&(
+        <>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:5}}>
+            <span style={{color:C.muted}}>{fAmt(bankroll,cur)}</span>
+            <span style={{color:reached?C.greenBright:C.gold,fontWeight:700}}>{fAmt(goal,cur)}</span>
+          </div>
+          <div style={{height:8,background:C.bg3,borderRadius:6,overflow:"hidden",marginBottom:5}}>
+            <div style={{height:"100%",width:`${pct}%`,background:reached?"linear-gradient(90deg,#10b981,#34d399)":"linear-gradient(90deg,#f59e0b,#fcd34d)",borderRadius:6,transition:"width .6s ease"}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:11}}>
+            <span style={{color:reached?C.greenBright:C.muted}}>{reached?t.goalReached:`${pct.toFixed(1)}% ${t.goalProgress||"atteint"}`}</span>
+            {!reached&&<span style={{color:C.muted}}>Reste: {fAmt(goal-bankroll,cur)}</span>}
+          </div>
+        </>
+      )}
+      {!goal&&!editing&&isAdmin&&<div style={{color:C.muted,fontSize:12,textAlign:"center",padding:"4px 0"}}>{t.goalSet}</div>}
+    </div>
+  );
+}
+
+/* ═══════════════════════ PERIOD COMPARISON ═══════════════════════ */
+function PeriodComparison({bets,cur,t}){
+  const now=new Date();
+  const weekStart=new Date(now); weekStart.setDate(now.getDate()-now.getDay()+1); weekStart.setHours(0,0,0,0);
+  const prevWeekStart=new Date(weekStart); prevWeekStart.setDate(weekStart.getDate()-7);
+  const prevWeekEnd=new Date(weekStart);
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const prevMonthStart=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const prevMonthEnd=new Date(now.getFullYear(),now.getMonth(),0);
+  const filter=(from,to)=>bets.filter(b=>{const d=new Date(b.date);return d>=from&&(!to||d<=to);});
+  const thisWeek=calcPeriod(filter(weekStart));
+  const lastWeek=calcPeriod(filter(prevWeekStart,prevWeekEnd));
+  const thisMonth=calcPeriod(filter(monthStart));
+  const lastMonth=calcPeriod(filter(prevMonthStart,prevMonthEnd));
+  const Row=({label,curr,prev})=>{
+    const diff=curr.netProfit-prev.netProfit;
+    return(
+      <div style={{background:C.bg3,borderRadius:10,padding:"10px 12px",marginBottom:7}}>
+        <div style={{color:C.sub,fontSize:10,fontWeight:700,textTransform:"uppercase",marginBottom:7}}>{label}</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+          {[["Actuel",curr.netProfit,true],["Précédent",prev.netProfit,false],["Évolution",diff,true]].map(([l,v,bold],i)=>(
+            <div key={i} style={{textAlign:"center"}}>
+              <div style={{color:C.muted,fontSize:9,marginBottom:2}}>{l}</div>
+              <div style={{color:v>=0?C.greenBright:C.redBright,fontWeight:bold?800:500,fontSize:12}}>{v>=0?"+":""}{fAmt(v,cur)}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+  return(
+    <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 15px",marginBottom:11}}>
+      <h4 style={{color:C.white,fontWeight:700,margin:"0 0 11px",fontSize:14}}>📊 Comparaison de périodes</h4>
+      <Row label="Cette semaine vs semaine dernière" curr={thisWeek} prev={lastWeek}/>
+      <Row label="Ce mois vs mois dernier" curr={thisMonth} prev={lastMonth}/>
+    </div>
+  );
+}
+
+/* ═══════════════════════ MAX STREAK ═══════════════════════ */
+function MaxStreakWidget({bets}){
+  const resolved=[...bets].filter(b=>b.status==="won"||b.status==="lost").sort((a,b)=>new Date(a.date)-new Date(b.date));
+  let maxW=0,maxL=0,curW=0,curL=0,curStreak=0,curType=null;
+  resolved.forEach(b=>{
+    if(b.status==="won"){curW++;curL=0;if(curW>maxW)maxW=curW;}
+    else{curL++;curW=0;if(curL>maxL)maxL=curL;}
+    if(!curType||b.status===curType){curStreak++;curType=b.status;}
+    else{curStreak=1;curType=b.status;}
+  });
+  if(resolved.length===0)return null;
+  return(
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:11}}>
+      {[["🔥 Meilleure série",`${maxW} ✓`,C.greenBright],["💀 Pire série",`${maxL} ✗`,C.redBright],["🎯 Streak actuel",`${curStreak} ${curType==="won"?"✓":"✗"}`,curType==="won"?C.greenBright:C.redBright]].map(([l,v,c],i)=>(
+        <div key={i} style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:12,padding:"11px 8px",textAlign:"center"}}>
+          <div style={{color:C.muted,fontSize:9,marginBottom:4}}>{l}</div>
+          <div style={{color:c,fontWeight:800,fontSize:16}}>{v}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ═══════════════════════ TEAM AUTOCOMPLETE ═══════════════════════ */
+function TeamInput({label,value,onChange,bets,err}){
+  const [focus,setFocus]=useState(false);
+  const all=[...new Set(bets.flatMap(b=>b.selections.flatMap(s=>[s.homeTeam,s.awayTeam])))].filter(Boolean);
+  const filtered=value.length>1?all.filter(t=>t.toLowerCase().includes(value.toLowerCase())&&t!==value).slice(0,5):[];
+  return(
+    <div style={{position:"relative",marginBottom:11}}>
+      {label&&<label style={{display:"block",fontSize:11,fontWeight:700,color:C.sub,marginBottom:4,textTransform:"uppercase",letterSpacing:".7px"}}>{label}</label>}
+      <input value={value} onChange={e=>onChange(e.target.value)} onFocus={()=>setFocus(true)} onBlur={()=>setTimeout(()=>setFocus(false),150)}
+        style={{width:"100%",background:C.bg3,border:`1px solid ${err?C.red:C.border2}`,borderRadius:10,padding:"10px 13px",color:C.white,fontSize:14,fontFamily:"inherit",outline:"none",boxSizing:"border-box"}}/>
+      {err&&<div style={{color:C.redBright,fontSize:11,marginTop:3}}>⚠ {err}</div>}
+      {focus&&filtered.length>0&&(
+        <div style={{position:"absolute",top:"100%",left:0,right:0,background:C.bg2,border:`1px solid ${C.border2}`,borderRadius:10,zIndex:50,overflow:"hidden",boxShadow:"0 8px 24px rgba(0,0,0,.4)"}}>
+          {filtered.map((t,i)=>(
+            <div key={i} onMouseDown={()=>onChange(t)} style={{padding:"9px 13px",cursor:"pointer",color:C.white,fontSize:13,borderBottom:i<filtered.length-1?`1px solid ${C.border}`:"none"}}
+              onMouseEnter={e=>e.currentTarget.style.background=C.bg3}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              🔍 {t}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+/* ═══════════════════════ NOTIFICATIONS ═══════════════════════ */
+const NOTIF_KEY = "morganbet_notif_state";
+
+function getNotifState(){
+  try{ return JSON.parse(localStorage.getItem(NOTIF_KEY)||"{}"); }catch{ return {}; }
+}
+function setNotifState(s){
+  try{ localStorage.setItem(NOTIF_KEY,JSON.stringify(s)); }catch{}
+}
+
+async function requestNotifPermission(){
+  if(!("Notification" in window))return false;
+  if(Notification.permission==="granted")return true;
+  if(Notification.permission==="denied")return false;
+  const r=await Notification.requestPermission();
+  return r==="granted";
+}
+
+function sendNotif(title,body,tag){
+  if(!("Notification" in window)||Notification.permission!=="granted")return;
+  try{
+    new Notification(title,{
+      body,
+      tag,
+      icon:"/favicon.svg",
+      badge:"/favicon.svg",
+      requireInteraction:false,
+    });
+  }catch(e){ console.warn("Notification error:",e); }
+}
+
+function checkAndSendNotifications(data,lang){
+  if(!data||!("Notification" in window)||Notification.permission!=="granted")return;
+  const state=getNotifState();
+  const now=new Date();
+  const todayKey=now.toISOString().split("T")[0];
+  const bets=data?.bets||[];
+  const bankroll=data?.bankroll?.eur||0;
+  const goal=data?.goal||0;
+
+  const labels={
+    fr:{
+      pending24Title:"⏳ Paris en attente",
+      pending24Body:n=>`Tu as ${n} pari${n>1?"s":""} en cours depuis plus de 24h. Pense à mettre à jour les statuts !`,
+      lossTitle:"🚨 Alerte perte hebdomadaire",
+      lossBody:(pct,amt)=>`Tu as perdu ${pct.toFixed(1)}% de ta bankroll cette semaine (€${Math.abs(amt).toFixed(2)}).`,
+      goalTitle:"🎉 Objectif atteint !",
+      goalBody:amt=>`Félicitations ! Ta bankroll a atteint €${amt.toFixed(2)}. Continue comme ça !`,
+      summaryTitle:"📊 Résumé du jour",
+      summaryBody:(bk,profit,n)=>`Bankroll: €${bk.toFixed(2)} | Profit NET: ${profit>=0?"+":""}€${profit.toFixed(2)} | ${n} paris total`,
+    },
+    en:{
+      pending24Title:"⏳ Pending bets",
+      pending24Body:n=>`You have ${n} bet${n>1?"s":""} pending for more than 24h. Don't forget to update their status!`,
+      lossTitle:"🚨 Weekly loss alert",
+      lossBody:(pct,amt)=>`You've lost ${pct.toFixed(1)}% of your bankroll this week (€${Math.abs(amt).toFixed(2)}).`,
+      goalTitle:"🎉 Goal reached!",
+      goalBody:amt=>`Congratulations! Your bankroll has reached €${amt.toFixed(2)}. Keep it up!`,
+      summaryTitle:"📊 Daily summary",
+      summaryBody:(bk,profit,n)=>`Bankroll: €${bk.toFixed(2)} | Net profit: ${profit>=0?"+":""}€${profit.toFixed(2)} | ${n} total bets`,
+    },
+    it:{
+      pending24Title:"⏳ Scommesse in attesa",
+      pending24Body:n=>`Hai ${n} scommessa${n>1?"e":""} in corso da più di 24h. Ricorda di aggiornare gli stati!`,
+      lossTitle:"🚨 Allerta perdite settimanali",
+      lossBody:(pct,amt)=>`Hai perso il ${pct.toFixed(1)}% del tuo bankroll questa settimana (€${Math.abs(amt).toFixed(2)}).`,
+      goalTitle:"🎉 Obiettivo raggiunto!",
+      goalBody:amt=>`Congratulazioni! Il tuo bankroll ha raggiunto €${amt.toFixed(2)}. Continua così!`,
+      summaryTitle:"📊 Riepilogo giornaliero",
+      summaryBody:(bk,profit,n)=>`Bankroll: €${bk.toFixed(2)} | Profitto netto: ${profit>=0?"+":""}€${profit.toFixed(2)} | ${n} scommesse totali`,
+    },
+  };
+  const L=labels[lang]||labels.fr;
+
+  // ── 1. Paris en cours +24h ──────────────────────────────
+  const old24=bets.filter(b=>{
+    if(b.status!=="pending")return false;
+    const age=(now-new Date(b.date))/3600000;
+    return age>24;
+  });
+  const last24Key=`notif_24h_${todayKey}`;
+  if(old24.length>0&&state[last24Key]!==old24.length){
+    sendNotif(L.pending24Title,L.pending24Body(old24.length),"pending-24h");
+    state[last24Key]=old24.length;
+  }
+
+  // ── 2. Alerte perte hebdomadaire ──────────────────────────
+  const weekStart=new Date(now); weekStart.setDate(now.getDate()-now.getDay()+1); weekStart.setHours(0,0,0,0);
+  const weekLost=bets.filter(b=>b.status==="lost"&&new Date(b.date)>=weekStart);
+  const weekLoss=weekLost.reduce((a,b)=>a+b.stakeEur,0);
+  const weekPct=bankroll>0?weekLoss/bankroll*100:0;
+  const lossKey=`notif_loss_${todayKey}`;
+  if(weekPct>=10&&!state[lossKey]){
+    sendNotif(L.lossTitle,L.lossBody(weekPct,weekLoss),"weekly-loss");
+    state[lossKey]=true;
+  }
+
+  // ── 3. Objectif atteint ────────────────────────────────────
+  const goalKey=`notif_goal_${Math.floor(goal)}`;
+  if(goal>0&&bankroll>=goal&&!state[goalKey]){
+    sendNotif(L.goalTitle,L.goalBody(bankroll),"goal-reached");
+    state[goalKey]=true;
+  }
+
+  // ── 4. Résumé quotidien (une fois par jour) ──────────────
+  const summaryKey=`notif_summary_${todayKey}`;
+  const hour=now.getHours();
+  if(hour>=8&&!state[summaryKey]){
+    const resolved=bets.filter(b=>b.status==="won"||b.status==="lost");
+    const profit=resolved.reduce((a,b)=>a+(b.status==="won"?b.potentialGainEur-b.stakeEur:-b.stakeEur),0);
+    sendNotif(L.summaryTitle,L.summaryBody(bankroll,profit,bets.length),"daily-summary");
+    state[summaryKey]=true;
+  }
+
+  setNotifState(state);
+}
+
 /* ═══════════════════════ MAIN APP ═══════════════════════ */
 export default function App(){
   const [page,setPage]=useState("landing");
@@ -1260,7 +1621,10 @@ export default function App(){
   const [toast,setToast]=useState({msg:"",type:""});
   const [lightMode,setLightMode]=useState(false);
   const [calcOpen,setCalcOpen]=useState(false);
+  const [goalEur,setGoalEur]=useState(0);
   const [menuOpen,setMenuOpen]=useState(false);
+  const [notifGranted,setNotifGranted]=useState(false);
+  const [showNotifPrompt,setShowNotifPrompt]=useState(false);
   const t=T[lang];
 
   const showToast=(msg,type="info")=>setToast({msg,type});
@@ -1276,10 +1640,18 @@ export default function App(){
       const empty={bankroll:{eur:0,initial:0,setup:false},bets:[],pin:DEFAULT_PIN,lang:"fr",cur:"EUR"};
       setData(empty); saveData(empty);
     }
+    if(d?.goal)setGoalEur(d.goal||0);
+    // Check notification permission
+    if("Notification" in window){
+      setNotifGranted(Notification.permission==="granted");
+      if(Notification.permission==="default")setShowNotifPrompt(true);
+    }
+    // Run notification checks after load
+    if(d)setTimeout(()=>checkAndSendNotifications(d,d?.lang||"fr"),2000);
     setLoading(false);
   }); },[]);
 
-  const persist=useCallback(nd=>{ setData(nd); saveData(nd); },[]);
+  const persist=useCallback(nd=>{ setData(nd); saveData(nd); setTimeout(()=>checkAndSendNotifications(nd,nd?.lang||lang),500); },[lang]);
   const toggleLight=()=>setLightMode(m=>!m);
 
   const checkPin=(entered,onFail)=>{
@@ -1303,6 +1675,19 @@ export default function App(){
     showToast("Paris dupliqué ✓","success");
   };
   const handleDelete=id=>{ askConfirm({title:t.confirmDelTitle,message:t.confirmDelMsg,okLabel:t.confirmDelOk},()=>{ persist({...data,bets:data.bets.filter(b=>b.id!==id)}); showToast(t.tDel,"error"); }); };
+  const handleExportExcel=()=>{
+    const rows=[["Date","Nom","Type","Statut","Mise EUR","Cote","Gain potentiel EUR","Profit EUR","Note","Tipster"]];
+    bets.forEach(b=>{
+      const profit=b.status==="won"?b.potentialGainEur-b.stakeEur:b.status==="lost"?-b.stakeEur:0;
+      rows.push([new Date(b.date).toLocaleDateString("fr-FR"),b.name,b.type,b.status,b.stakeEur.toFixed(2),b.totalCote,b.potentialGainEur.toFixed(2),profit.toFixed(2),b.note||"",b.tipster||""]);
+    });
+    const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download="MorganbetBK_paris.csv"; a.click(); URL.revokeObjectURL(url);
+    showToast("Export téléchargé ✓","success");
+  };
+  const handleSetGoal=eur=>{ setGoalEur(eur); persist({...data,goal:eur}); showToast("🎯 Objectif défini !","success"); };
   const handleUpdateBankroll=(eur,mode)=>{ let n=data.bankroll.eur; if(mode==="set")n=eur;else if(mode==="add")n+=eur;else n=Math.max(0,n-eur); const wasEmpty=!data.bankroll.initial||data.bankroll.initial===0; persist({...data,bankroll:{...data.bankroll,eur:n,initial:wasEmpty&&mode==="set"?n:data.bankroll.initial,setup:true}}); };
   const handleResetRequest=()=>{ askConfirm({title:t.confirmResetTitle,message:t.confirmResetMsg,okLabel:t.confirmResetOk},()=>{ persist({bankroll:{eur:0,initial:0,setup:false},bets:[],pin:data?.pin||DEFAULT_PIN}); setIsAdmin(false); setPage("landing"); showToast(t.tReset,"error"); }); };
   const handleLangChange=l=>{ setLang(l); if(data)persist({...data,lang:l}); };
@@ -1407,15 +1792,35 @@ export default function App(){
         </div>
       </nav>
 
+      {/* Notif prompt banner */}
+      {showNotifPrompt&&!notifGranted&&page==="dashboard"&&(
+        <div style={{background:"rgba(245,158,11,.1)",borderBottom:`1px solid ${C.goldBorder}`,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
+          <span style={{color:C.gold,fontSize:13,fontWeight:600}}>🔔 Activer les notifications pour recevoir des rappels</span>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={async()=>{const ok=await requestNotifPermission();setNotifGranted(ok);setShowNotifPrompt(false);if(ok){showToast("Notifications activées 🔔","success");checkAndSendNotifications(data,lang);}}} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#000",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>
+              Activer
+            </button>
+            <button onClick={()=>setShowNotifPrompt(false)} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${C.border}`,background:"transparent",color:C.muted,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>
+              Plus tard
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
       <main style={{paddingBottom:80}}>
-        {page==="dashboard"&&<Dashboard bankroll={bankroll} initialBankroll={data?.bankroll?.initial||bankroll} bets={bets} isAdmin={isAdmin} onPage={navTo} onStatus={handleStatus} onDelete={handleDelete} onDuplicate={handleDuplicate} cur={cur} t={t} onCalc={()=>setCalcOpen(true)}/>}
-        {page==="newbet"&&(isAdmin?<NewBet bankroll={bankroll} onAdd={handleAddBet} onBack={()=>setPage("dashboard")} showToast={showToast} t={t} lang={lang}/>:<AccessDenied/>)}
+        {page==="dashboard"&&<Dashboard bankroll={bankroll} initialBankroll={data?.bankroll?.initial||bankroll} bets={bets} isAdmin={isAdmin} onPage={navTo} onStatus={handleStatus} onDelete={handleDelete} onDuplicate={handleDuplicate} cur={cur} t={t} onCalc={()=>setCalcOpen(true)} goal={goalEur} onSetGoal={handleSetGoal}/>}
+        {page==="newbet"&&(isAdmin?<NewBet bankroll={bankroll} onAdd={handleAddBet} onBack={()=>setPage("dashboard")} showToast={showToast} t={t} lang={lang} bets={bets}/>:<AccessDenied/>)}
         {page==="history"&&<History bets={bets} isAdmin={isAdmin} onStatus={handleStatus} onDelete={handleDelete} onDuplicate={handleDuplicate} cur={cur} t={t}/>}
         {page==="stats"&&<Stats bets={bets} bankroll={bankroll} initialBankroll={data?.bankroll?.initial||bankroll} cur={cur} t={t}/>}
         {page==="bilan"&&<Bilan bets={bets} cur={cur} t={t}/>}
-        {page==="settings"&&(isAdmin?<Settings bankroll={bankroll} onUpdateBankroll={handleUpdateBankroll} onResetRequest={handleResetRequest} onChangePin={p=>persist({...data,pin:p})} cur={cur} onCurChange={handleCurChange} lang={lang} onLangChange={handleLangChange} lightMode={lightMode} onToggleLight={toggleLight} showToast={showToast} t={t}/>:<AccessDenied/>)}
+        {page==="settings"&&(isAdmin?<Settings bankroll={bankroll} onUpdateBankroll={handleUpdateBankroll} onResetRequest={handleResetRequest} onChangePin={p=>persist({...data,pin:p})} cur={cur} onCurChange={handleCurChange} lang={lang} onLangChange={handleLangChange} lightMode={lightMode} onToggleLight={toggleLight} onExport={handleExportExcel} notifGranted={notifGranted} setNotifGranted={setNotifGranted} showToast={showToast} t={t}/>:<AccessDenied/>)}
       </main>
+
+      {/* Floating add button - mobile only */}
+      <div className="bot-nav" style={{display:"none"}}>
+        <FloatingAddBtn onClick={()=>navTo("newbet")} isAdmin={isAdmin} showPin={()=>setShowPin(true)}/>
+      </div>
 
       {/* Mobile bottom bar with hamburger */}
       <div className="bot-nav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:90,background:"rgba(6,14,26,.97)",backdropFilter:"blur(16px)",borderTop:`1px solid ${C.border}`,paddingBottom:"env(safe-area-inset-bottom,0)",alignItems:"center",justifyContent:"space-around",padding:"8px 10px"}}>
