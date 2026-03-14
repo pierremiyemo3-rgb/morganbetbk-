@@ -1002,8 +1002,18 @@ export default function App(){
             {page===n.id&&<span style={{fontSize:11,color:C.gold}}>●</span>}
           </button>
         ))}
+        <div style={{borderTop:`1px solid ${C.border}`,paddingTop:10,marginTop:4}}>
+          <div style={{color:C.muted,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Langue / Language</div>
+          <div style={{display:"flex",gap:6}}>
+            {[["fr","🇫🇷 FR"],["en","🇬🇧 EN"],["it","🇮🇹 IT"]].map(([l,label])=>(
+              <button key={l} onClick={()=>{handleLangChange(l);}} style={{flex:1,padding:"9px 4px",borderRadius:10,border:`2px solid ${lang===l?C.gold:C.border}`,background:lang===l?C.goldDim:"transparent",color:lang===l?C.gold:C.muted,fontWeight:700,cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         {isAdmin&&(
-          <button onClick={()=>{setIsAdmin(false);setMenuOpen(false);}} style={{width:"100%",padding:"11px 16px",background:"transparent",border:`1px solid rgba(139,92,246,.2)`,borderRadius:12,color:"#a78bfa",cursor:"pointer",fontFamily:"inherit",fontSize:13,fontWeight:600,marginTop:4}}>
+          <button onClick={()=>{setIsAdmin(false);setMenuOpen(false);}} style={{width:"100%",padding:"11px 16px",background:"transparent",border:`1px solid rgba(139,92,246,.2)`,borderRadius:12,color:"#a78bfa",cursor:"pointer",fontFamily:"inherit",fontSize:13,fontWeight:600,marginTop:8}}>
             🔐 Déconnexion admin
           </button>
         )}
