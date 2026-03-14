@@ -419,7 +419,7 @@ function Setup({t,onSave}){
 }
 
 /* ═══════════════════════ BET CARD ═══════════════════════ */
-function BetCard({bet,isAdmin,onStatus,onDelete,cur,t}){
+function BetCard({bet,isAdmin,onStatus,onDelete,onDuplicate,cur,t}){
   const [open,setOpen]=useState(false);
   return(
     <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:13,padding:"12px 14px"}}>
@@ -464,16 +464,25 @@ function BetCard({bet,isAdmin,onStatus,onDelete,cur,t}){
         </div>
       )}
       {isAdmin&&bet.status!=="pending"&&(
-        <div style={{display:"flex",justifyContent:"flex-end",marginTop:8}}>
+        <div style={{display:"flex",justifyContent:"flex-end",gap:6,marginTop:8}}>
+          <Btn sm v="ghost" onClick={()=>onDuplicate&&onDuplicate(bet)} style={{color:C.accent}}>📋 Dupliquer</Btn>
           <Btn sm v="ghost" onClick={()=>onDelete(bet.id)} style={{color:C.red}}>{t.del}</Btn>
         </div>
       )}
+      <div style={{display:"flex",justifyContent:"flex-end",marginTop:4}}>
+        <button onClick={()=>{
+          const txt=`🎯 ${bet.name}\n💰 Mise: ${fEur(bet.stakeEur)} | Cote: ×${bet.totalCote}\n💵 Gain potentiel: ${fEur(bet.potentialGainEur)}\n📊 Statut: ${bet.status}\nVia MorganbetBK`;
+          if(navigator.share){navigator.share({text:txt});}else{window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,"_blank");}
+        }} style={{background:"none",border:"none",color:"#25d366",fontSize:11,cursor:"pointer",padding:"2px 0"}}>
+          📤 Partager WhatsApp
+        </button>
+      </div>
     </div>
   );
 }
 
 /* ═══════════════════════ DASHBOARD ═══════════════════════ */
-function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDelete,cur,t}){
+function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDelete,onDuplicate,cur,t,onCalc}){
   const {won,resolved,totalStaked,netProfit,roi,wr}=calcPeriod(bets);
   const pending=bets.filter(b=>b.status==="pending");
   const totalReturned=won.reduce((a,b)=>a+b.potentialGainEur,0);
@@ -484,12 +493,31 @@ function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDele
   });
   return(
     <div style={{maxWidth:940,margin:"0 auto",padding:"14px 12px"}}>
+      {(()=>{
+        const weekStart=new Date(); weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+        const weekBets=bets.filter(b=>b.status==="lost"&&new Date(b.date)>=weekStart);
+        const weekLoss=weekBets.reduce((a,b)=>a+b.stakeEur,0);
+        const weekPct=bankroll>0?weekLoss/bankroll*100:0;
+        if(weekPct<10)return null;
+        return(
+          <div style={{background:"rgba(239,68,68,.1)",border:"1px solid rgba(239,68,68,.3)",borderRadius:12,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:20}}>🚨</span>
+            <div>
+              <div style={{color:"#f87171",fontWeight:700,fontSize:13}}>Alerte perte hebdomadaire</div>
+              <div style={{color:"#4d6680",fontSize:11}}>Tu as perdu {fAmt(weekLoss,cur)} cette semaine ({weekPct.toFixed(1)}% de ta bankroll)</div>
+            </div>
+          </div>
+        );
+      })()}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,gap:10}}>
         <div>
           <h2 style={{color:C.white,fontWeight:900,fontSize:"clamp(16px,4vw,22px)",margin:0}}>{t.dashTitle}</h2>
           <p style={{color:C.muted,fontSize:11,margin:"3px 0 0"}}>{isAdmin?t.dashAdmin:t.dashReadonly}</p>
         </div>
-        {isAdmin&&<Btn onClick={()=>onPage("newbet")} sm>{t.addBet}</Btn>}
+        <div style={{display:"flex",gap:8}}>
+          <Btn onClick={()=>onCalc&&onCalc()} sm v="ghost" style={{borderColor:C.goldBorder,color:C.gold}}>🧮 Calc</Btn>
+          {isAdmin&&<Btn onClick={()=>onPage("newbet")} sm>{t.addBet}</Btn>}
+        </div>
       </div>
       <div style={{background:"linear-gradient(135deg,rgba(245,158,11,.12),rgba(16,185,129,.06))",border:`1px solid ${C.goldBorder}`,borderRadius:18,padding:"16px 18px",marginBottom:12}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",flexWrap:"wrap",gap:12}}>
@@ -517,7 +545,7 @@ function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDele
       {pending.length===0
         ?<div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:13,padding:"22px",textAlign:"center",color:C.muted}}>{t.noPending}{isAdmin&&<span onClick={()=>onPage("newbet")} style={{color:C.gold,cursor:"pointer"}}>{t.addHere}</span>}</div>
         :<div style={{display:"flex",flexDirection:"column",gap:8}}>
-          {pending.slice(0,5).map(b=><BetCard key={b.id} bet={b} isAdmin={isAdmin} onStatus={onStatus} onDelete={onDelete} cur={cur} t={t}/>)}
+          {pending.slice(0,5).map(b=><BetCard key={b.id} bet={b} isAdmin={isAdmin} onStatus={onStatus} onDelete={onDelete} onDuplicate={onDuplicate} cur={cur} t={t}/>)}
           {pending.length>5&&<button onClick={()=>onPage("history")} style={{background:"none",border:"none",color:C.gold,cursor:"pointer",fontSize:13,padding:8}}>{t.seeAll}</button>}
         </div>
       }
@@ -531,6 +559,7 @@ function NewBet({bankroll,onAdd,onBack,showToast,t,lang}){
   const [stake,setStake]=useState(""), [stkCur,setStkCur]=useState("EUR");
   const [name,setName]=useState(""), [note,setNote]=useState("");
   const [betDate,setBetDate]=useState(todayISO()), [errs,setErrs]=useState({});
+  const [tipster,setTipster]=useState("");
   const mkts=MARKETS[lang]||MARKETS.fr;
   const stakeEur=parseFloat(stake)>0?(stkCur==="EUR"?parseFloat(stake):parseFloat(stake)/XAF):0;
   const totalCote=sels.reduce((a,s)=>{const c=parseFloat(s.cote);return a*(isNaN(c)||c<=0?1:c);},1);
@@ -541,7 +570,7 @@ function NewBet({bankroll,onAdd,onBack,showToast,t,lang}){
     if(stakeEur<=0)e.stake=t.eStake;
     sels.forEach((s,i)=>{if(!s.home.trim())e[`h${i}`]=t.eTeam;if(!s.away.trim())e[`a${i}`]=t.eTeam;if(!parseFloat(s.cote))e[`c${i}`]=t.eCote;});
     if(Object.keys(e).length){setErrs(e);return;}
-    onAdd({id:Date.now().toString(),type,status:"pending",date:new Date(betDate).toISOString(),name:name.trim()||(type==="simple"?`${sels[0].home} vs ${sels[0].away}`:`${t.combineL} ${sels.length}`),selections:sels.map(s=>({homeTeam:s.home.trim(),awayTeam:s.away.trim(),market:mkts.find(m=>m.id===s.mkt)?.label||s.mkt,marketId:s.mkt,cote:parseFloat(s.cote)})),stakeEur,totalCote:parseFloat(totalCote.toFixed(3)),potentialGainEur:gain,note:note.trim()});
+    onAdd({id:Date.now().toString(),type,status:"pending",date:new Date(betDate).toISOString(),name:name.trim()||(type==="simple"?`${sels[0].home} vs ${sels[0].away}`:`${t.combineL} ${sels.length}`),selections:sels.map(s=>({homeTeam:s.home.trim(),awayTeam:s.away.trim(),market:mkts.find(m=>m.id===s.mkt)?.label||s.mkt,marketId:s.mkt,cote:parseFloat(s.cote)})),stakeEur,totalCote:parseFloat(totalCote.toFixed(3)),potentialGainEur:gain,note:note.trim(),tipster:tipster.trim()});
     showToast(t.tSaved,"success");
   };
   return(
@@ -594,6 +623,7 @@ function NewBet({bankroll,onAdd,onBack,showToast,t,lang}){
       </div>
       <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:13,padding:"12px 13px",marginBottom:13}}>
         <Inp label={t.note} placeholder={t.notePh} value={note} onChange={e=>setNote(e.target.value)}/>
+        <Inp label="👤 Tipster (optionnel)" placeholder="Nom du tipster..." value={tipster} onChange={e=>setTipster(e.target.value)}/>
       </div>
       <Btn full style={{padding:14,fontSize:15}} onClick={submit}>{t.save}</Btn>
     </div>
@@ -601,11 +631,14 @@ function NewBet({bankroll,onAdd,onBack,showToast,t,lang}){
 }
 
 /* ═══════════════════════ HISTORY ═══════════════════════ */
-function History({bets,isAdmin,onStatus,onDelete,cur,t}){
+function History({bets,isAdmin,onStatus,onDelete,onDuplicate,cur,t}){
   const [st,setSt]=useState("all"), [tp,setTp]=useState("all"), [q,setQ]=useState("");
+  const [mktFilter,setMktFilter]=useState("all");
+  const allMarkets=[...new Set(bets.flatMap(b=>b.selections.map(s=>s.market)))];
   const filtered=bets.filter(b=>{
     if(st!=="all"&&b.status!==st)return false;
     if(tp!=="all"&&b.type!==tp)return false;
+    if(mktFilter!=="all"&&!b.selections.some(s=>s.market===mktFilter))return false;
     if(q){const s=q.toLowerCase();return b.name.toLowerCase().includes(s)||b.selections.some(x=>x.homeTeam.toLowerCase().includes(s)||x.awayTeam.toLowerCase().includes(s));}
     return true;
   }).sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -620,7 +653,7 @@ function History({bets,isAdmin,onStatus,onDelete,cur,t}){
         {FB(tp,"all",setTp,t.allTypes)}{FB(tp,"simple",setTp,t.simples)}{FB(tp,"combine",setTp,t.combines)}
       </div>
       <div style={{color:C.muted,fontSize:11,marginBottom:9}}>{t.results(filtered.length)}</div>
-      {filtered.length===0?<div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:13,padding:"22px",textAlign:"center",color:C.muted}}>{t.noResult}</div>:<div style={{display:"flex",flexDirection:"column",gap:8}}>{filtered.map(b=><BetCard key={b.id} bet={b} isAdmin={isAdmin} onStatus={onStatus} onDelete={onDelete} cur={cur} t={t}/>)}</div>}
+      {filtered.length===0?<div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:13,padding:"22px",textAlign:"center",color:C.muted}}>{t.noResult}</div>:<div style={{display:"flex",flexDirection:"column",gap:8}}>{filtered.map(b=><BetCard key={b.id} bet={b} isAdmin={isAdmin} onStatus={onStatus} onDelete={onDelete} onDuplicate={onDuplicate} cur={cur} t={t}/>)}</div>}
     </div>
   );
 }
@@ -690,6 +723,11 @@ function Stats({bets,bankroll,initialBankroll,cur,t}){
           })}
         </div>
       </div>
+      <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 15px",marginBottom:11}}>
+        <h4 style={{color:C.white,fontWeight:700,margin:"0 0 11px",fontSize:14}}>📈 Évolution de la bankroll</h4>
+        <BankrollChart bets={bets} initialBankroll={initialBankroll} cur={cur}/>
+      </div>
+      <BestDayAnalysis bets={bets} cur={cur}/>
       {Object.keys(mkts).length>0&&(
         <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 15px"}}>
           <h4 style={{color:C.white,fontWeight:700,margin:"0 0 11px"}}>{t.market}</h4>
@@ -769,7 +807,12 @@ function Bilan({bets,cur,t}){
   const {totalStaked,netProfit}=calcPeriod(bets);
   return(
     <div style={{maxWidth:900,margin:"0 auto",padding:"14px 12px"}}>
-      <h2 style={{color:C.white,fontWeight:900,fontSize:"clamp(16px,4vw,22px)",margin:"0 0 12px"}}>{t.bilanTitle}</h2>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+        <h2 style={{color:C.white,fontWeight:900,fontSize:"clamp(16px,4vw,22px)",margin:0}}>{t.bilanTitle}</h2>
+        <button onClick={()=>window.print()} style={{padding:"8px 14px",borderRadius:10,border:`1px solid ${C.goldBorder}`,background:C.goldDim,color:C.gold,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>
+          📄 Exporter PDF
+        </button>
+      </div>
       <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,padding:"11px 15px",marginBottom:12,display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(110px,1fr))",gap:9}}>
         {[{l:t.staked,v:fAmt(totalStaked,cur)},{l:t.globalNet,v:(netProfit>=0?"+":"")+fAmt(netProfit,cur),c:netProfit>=0?C.greenBright:C.redBright},{l:t.totalBets,v:bets.length},{l:t.periods,v:sorted.length}].map((s,i)=>(
           <div key={i}><div style={{color:C.muted,fontSize:10,marginBottom:2}}>{s.l}</div><div style={{color:s.c||C.white,fontWeight:800,fontSize:14}}>{s.v}</div></div>
@@ -786,7 +829,7 @@ function Bilan({bets,cur,t}){
 }
 
 /* ═══════════════════════ SETTINGS ═══════════════════════ */
-function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCurChange,lang,onLangChange,showToast,t}){
+function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCurChange,lang,onLangChange,lightMode,onToggleLight,showToast,t}){
   const [amt,setAmt]=useState(""), [amtCur,setAmtCur]=useState("EUR"), [mode,setMode]=useState("set");
   const [np,setNp]=useState(""), [np2,setNp2]=useState(""), [pe,setPe]=useState({});
   const apply=()=>{ const n=parseFloat(amt); if(!n||n<=0)return; onUpdateBankroll(amtCur==="EUR"?n:n/XAF,mode); setAmt(""); showToast(t.tBank,"success"); };
@@ -816,10 +859,149 @@ function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCu
         <Inp label={t.confirmPINLbl} type="password" maxLength={4} inputMode="numeric" placeholder="••••" value={np2} onChange={e=>{setNp2(e.target.value.replace(/\D/g,""));setPe(x=>({...x,np2:null}));}} style={{borderColor:np2.length===4?(np===np2?C.green:C.red):C.border2}} err={pe.np2}/>
         <Btn full v="ghost" onClick={chgPin}>{t.updatePIN}</Btn>
       </div>
+      <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 15px",marginBottom:9}}>
+        <h4 style={{color:C.white,margin:"0 0 9px"}}>🎨 Apparence</h4>
+        <button onClick={onToggleLight} style={{width:"100%",padding:"11px",borderRadius:10,border:`2px solid ${lightMode?"#38bdf8":C.border}`,background:lightMode?"rgba(56,189,248,.1)":"transparent",color:lightMode?"#38bdf8":C.sub,fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:13}}>
+          {lightMode?"☀️ Mode clair (actif)":"🌙 Mode sombre (actif)"}
+        </button>
+      </div>
       <div style={{background:C.bg2,border:"1px solid rgba(239,68,68,.2)",borderRadius:14,padding:"13px 15px"}}>
         <h4 style={{color:C.red,margin:"0 0 6px"}}>{t.dangerZone}</h4>
         <p style={{color:C.muted,fontSize:12,marginBottom:10,lineHeight:1.6}}>{t.dangerText}</p>
         <Btn v="red" full onClick={onResetRequest}>{t.resetBtn}</Btn>
+      </div>
+    </div>
+  );
+}
+
+
+/* ═══════════════════════ STAKE CALCULATOR ═══════════════════════ */
+function StakeCalculator({bankroll,cur,t,onClose}){
+  const [pct,setPct]=useState("5");
+  const [odds,setOdds]=useState("2.00");
+  const stake=bankroll*(parseFloat(pct)||0)/100;
+  const gain=stake*(parseFloat(odds)||0);
+  const profit=gain-stake;
+  const levels=[[1,"🟢 Très faible"],[2,"🟢 Faible"],[3,"🟡 Modéré"],[5,"🟠 Normal"],[8,"🔴 Élevé"],[10,"🚨 Risqué"]];
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",backdropFilter:"blur(12px)",zIndex:998,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:"#0b1929",border:"1px solid rgba(255,255,255,.12)",borderRadius:18,width:"100%",maxWidth:360,padding:"24px 20px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+          <h3 style={{color:"#eef2f7",fontWeight:800,fontSize:18,margin:0}}>🧮 Calculateur de mise</h3>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#4d6680",fontSize:20,cursor:"pointer"}}>✕</button>
+        </div>
+        <div style={{marginBottom:12}}>
+          <label style={{color:"#7a9ab8",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:.7,display:"block",marginBottom:4}}>Bankroll: {fAmt(bankroll,cur)}</label>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
+            {levels.map(([p,l])=>(
+              <button key={p} onClick={()=>setPct(String(p))} style={{padding:"6px 10px",borderRadius:8,border:`1.5px solid ${pct==p?"#f59e0b":"rgba(255,255,255,.1)"}`,background:pct==p?"rgba(245,158,11,.1)":"transparent",color:pct==p?"#f59e0b":"#7a9ab8",fontWeight:700,cursor:"pointer",fontSize:11,fontFamily:"inherit"}}>{p}% {l.split(" ")[0]}</button>
+            ))}
+          </div>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            <input type="number" min="0.1" max="100" step="0.1" value={pct} onChange={e=>setPct(e.target.value)} style={{flex:1,background:"#0f2035",border:"1px solid rgba(255,255,255,.12)",borderRadius:10,padding:"10px 12px",color:"#eef2f7",fontSize:14,fontFamily:"inherit",outline:"none"}}/>
+            <span style={{color:"#7a9ab8",fontWeight:700}}>%</span>
+          </div>
+        </div>
+        <div style={{marginBottom:16}}>
+          <label style={{color:"#7a9ab8",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:.7,display:"block",marginBottom:4}}>Cote</label>
+          <input type="number" min="1" step="0.01" value={odds} onChange={e=>setOdds(e.target.value)} style={{width:"100%",background:"#0f2035",border:"1px solid rgba(255,255,255,.12)",borderRadius:10,padding:"10px 12px",color:"#eef2f7",fontSize:14,fontFamily:"inherit",outline:"none",boxSizing:"border-box"}}/>
+        </div>
+        <div style={{background:"#0f2035",borderRadius:12,padding:"14px 16px"}}>
+          {[[`💰 Mise conseillée`,fAmt(stake,cur),"#f59e0b"],[`🎯 Gain potentiel`,fAmt(gain,cur),"#34d399"],[`📈 Profit NET`,`+${fAmt(profit,cur)}`,"#10b981"],[`⚠️ Risque`,levels.find(([p])=>p>=parseFloat(pct))?.[1]||"🚨 Très risqué","#f87171"]].map(([l,v,c],i)=>(
+            <div key={i} style={{display:"flex",justifyContent:"space-between",marginBottom:i<3?8:0,paddingTop:i===3?8:0,borderTop:i===3?"1px solid rgba(255,255,255,.07)":"none"}}>
+              <span style={{color:"#7a9ab8",fontSize:13}}>{l}</span>
+              <span style={{color:c,fontWeight:700,fontSize:13}}>{v}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════ BANKROLL CHART ═══════════════════════ */
+function BankrollChart({bets,initialBankroll,cur}){
+  const points=[initialBankroll];
+  let r=initialBankroll;
+  [...bets].filter(b=>b.status!=="pending").sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(b=>{
+    if(b.status==="won")r+=b.potentialGainEur-b.stakeEur;
+    else if(b.status==="lost")r-=b.stakeEur;
+    points.push(r);
+  });
+  if(points.length<2)return <div style={{color:"#4d6680",fontSize:12,textAlign:"center",padding:"20px 0"}}>Pas encore assez de données</div>;
+  const W=320,H=120,pad=10;
+  const mn=Math.min(...points),mx=Math.max(...points),range=mx-mn||1;
+  const pts=points.map((v,i)=>[pad+(i/(points.length-1))*(W-pad*2),H-pad-((v-mn)/range)*(H-pad*2)]);
+  const pathD="M"+pts.map(p=>p.join(",")).join("L");
+  const areaD=pathD+`L${pts[pts.length-1][0]},${H-pad} L${pts[0][0]},${H-pad} Z`;
+  const isUp=points[points.length-1]>=points[0];
+  const col=isUp?"#10b981":"#ef4444";
+  const labels=[0,Math.floor(points.length/2),points.length-1].filter((v,i,a)=>a.indexOf(v)===i);
+  return(
+    <div style={{width:"100%",overflowX:"auto"}}>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",maxWidth:W,display:"block"}}>
+        <defs>
+          <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={col} stopOpacity=".3"/>
+            <stop offset="100%" stopColor={col} stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+        {[0.25,0.5,0.75].map(f=>(
+          <line key={f} x1={pad} y1={pad+(1-f)*(H-pad*2)} x2={W-pad} y2={pad+(1-f)*(H-pad*2)} stroke="rgba(255,255,255,.05)" strokeWidth="1"/>
+        ))}
+        <path d={areaD} fill="url(#cg)"/>
+        <path d={pathD} fill="none" stroke={col} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        {pts.map((p,i)=>i===0||i===pts.length-1?<circle key={i} cx={p[0]} cy={p[1]} r="3" fill={col}/>:null)}
+        {labels.map(i=>(
+          <text key={i} x={pts[i][0]} y={H} textAnchor="middle" fill="#4d6680" fontSize="8">{fAmt(points[i],cur).replace("€","€").substring(0,7)}</text>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+/* ═══════════════════════ BEST DAY ANALYSIS ═══════════════════════ */
+function BestDayAnalysis({bets,cur}){
+  const days=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+  const hours=Array.from({length:24},(_,i)=>i);
+  const dayStats={},hourStats={};
+  bets.filter(b=>b.status==="won"||b.status==="lost").forEach(b=>{
+    const d=new Date(b.date);
+    const day=d.getDay(),hour=d.getHours();
+    if(!dayStats[day])dayStats[day]={w:0,l:0,profit:0};
+    if(!hourStats[hour])hourStats[hour]={w:0,l:0,profit:0};
+    const p=b.status==="won"?b.potentialGainEur-b.stakeEur:-b.stakeEur;
+    dayStats[day].profit+=p; dayStats[day][b.status==="won"?"w":"l"]++;
+    hourStats[hour].profit+=p; hourStats[hour][b.status==="won"?"w":"l"]++;
+  });
+  const bestDay=Object.entries(dayStats).sort((a,b)=>b[1].profit-a[1].profit)[0];
+  const bestHour=Object.entries(hourStats).sort((a,b)=>b[1].profit-a[1].profit)[0];
+  const worstDay=Object.entries(dayStats).sort((a,b)=>a[1].profit-b[1].profit)[0];
+  if(!bestDay)return null;
+  return(
+    <div style={{background:"#0b1929",border:"1px solid rgba(255,255,255,.07)",borderRadius:14,padding:"13px 15px",marginBottom:11}}>
+      <h4 style={{color:"#eef2f7",fontWeight:700,margin:"0 0 12px",fontSize:14}}>📅 Analyse temporelle</h4>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
+        {[["🟢 Meilleur jour",days[bestDay[0]],`+${fAmt(bestDay[1].profit,cur)}`,"#34d399"],["🔴 Pire jour",worstDay?days[worstDay[0]]:"—",worstDay?fAmt(worstDay[1].profit,cur):"—","#f87171"],["⏰ Meilleure heure",bestHour?`${bestHour[0]}h`:"—",bestHour?`+${fAmt(bestHour[1].profit,cur)}`:"—","#f59e0b"]].map(([l,v,sub,c],i)=>(
+          <div key={i} style={{background:"#0f2035",borderRadius:10,padding:"10px 8px",textAlign:"center"}}>
+            <div style={{color:"#4d6680",fontSize:9,marginBottom:4}}>{l}</div>
+            <div style={{color:c,fontWeight:800,fontSize:16}}>{v}</div>
+            <div style={{color:"#4d6680",fontSize:9,marginTop:2}}>{sub}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:"flex",gap:3,alignItems:"flex-end",height:50}}>
+        {days.map((d,i)=>{
+          const s=dayStats[i];
+          const h=s?Math.max(4,Math.abs(s.profit)/Math.max(...Object.values(dayStats).map(x=>Math.abs(x.profit)))*44):4;
+          const c=s?(s.profit>0?"#10b981":"#ef4444"):"#1a2840";
+          return(
+            <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+              <div style={{width:"100%",height:h,background:c,borderRadius:"3px 3px 0 0",opacity:s?.profit===bestDay[1].profit?1:.6}}/>
+              <span style={{color:"#4d6680",fontSize:8}}>{d}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -838,6 +1020,8 @@ export default function App(){
   const [confirmCfg,setConfirmCfg]=useState(null);
   const confirmCb=useRef(null);
   const [toast,setToast]=useState({msg:"",type:""});
+  const [lightMode,setLightMode]=useState(false);
+  const [calcOpen,setCalcOpen]=useState(false);
   const [menuOpen,setMenuOpen]=useState(false);
   const t=T[lang];
 
@@ -858,6 +1042,7 @@ export default function App(){
   }); },[]);
 
   const persist=useCallback(nd=>{ setData(nd); saveData(nd); },[]);
+  const toggleLight=()=>setLightMode(m=>!m);
 
   const checkPin=(entered,onFail)=>{
     if(entered===(data?.pin||DEFAULT_PIN)){ setIsAdmin(true); setShowPin(false); if(pendingPage){setPage(pendingPage);setPendingPage(null);} showToast(t.tAdmin,"success"); }
@@ -873,6 +1058,11 @@ export default function App(){
     else if(status==="lost")br-=bet.stakeEur;
     persist({...data,bankroll:{...data.bankroll,eur:br},bets:data.bets.map(b=>b.id===id?{...b,status}:b)});
     showToast({won:t.tWon,lost:t.tLost,refunded:t.tRef}[status]||"",status==="won"?"success":"error");
+  };
+  const handleDuplicate=bet=>{
+    const newBet={...bet,id:Date.now().toString(),status:"pending",date:new Date().toISOString(),name:bet.name+" (copie)"};
+    persist({...data,bets:[newBet,...(data.bets||[])]});
+    showToast("Paris dupliqué ✓","success");
   };
   const handleDelete=id=>{ askConfirm({title:t.confirmDelTitle,message:t.confirmDelMsg,okLabel:t.confirmDelOk},()=>{ persist({...data,bets:data.bets.filter(b=>b.id!==id)}); showToast(t.tDel,"error"); }); };
   const handleUpdateBankroll=(eur,mode)=>{ let n=data.bankroll.eur; if(mode==="set")n=eur;else if(mode==="add")n+=eur;else n=Math.max(0,n-eur); const wasEmpty=!data.bankroll.initial||data.bankroll.initial===0; persist({...data,bankroll:{...data.bankroll,eur:n,initial:wasEmpty&&mode==="set"?n:data.bankroll.initial,setup:true}}); };
@@ -901,6 +1091,12 @@ export default function App(){
   return(
     <div style={{minHeight:"100vh",background:C.bg,fontFamily:"'Segoe UI',system-ui,sans-serif"}}>
       <style>{`
+        body { background: ${lightMode ? '#f0f4f8' : '#060e1a'} !important; }
+        .light-card { background: ${lightMode ? '#ffffff' : ''} !important; border-color: ${lightMode ? '#e2e8f0' : ''} !important; }
+        .light-text { color: ${lightMode ? '#1a202c' : ''} !important; }
+        .light-sub { color: ${lightMode ? '#4a5568' : ''} !important; }
+      `}</style>
+      <style>{`
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
         .mob-top{display:flex!important;}
@@ -914,12 +1110,23 @@ export default function App(){
         input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.5;cursor:pointer;}
         input:focus,select:focus{border-color:rgba(245,158,11,.5)!important;box-shadow:0 0 0 3px rgba(245,158,11,.07);}
         ::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px;}
+        @media print{
+          .mob-top,.desk-nav,.bot-nav,button{display:none!important;}
+          body{background:white!important;color:black!important;}
+          div{border-color:#ddd!important;}
+        }
         input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.5;cursor:pointer;}
         input:focus,select:focus{border-color:rgba(245,158,11,.5)!important;box-shadow:0 0 0 3px rgba(245,158,11,.07);}
         ::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px;}
+        @media print{
+          .mob-top,.desk-nav,.bot-nav,button{display:none!important;}
+          body{background:white!important;color:black!important;}
+          div{border-color:#ddd!important;}
+        }
       `}</style>
 
       <ConfirmModal config={confirmCfg} t={t} onOk={handleConfirmOk} onCancel={handleConfirmCancel}/>
+      {calcOpen&&<StakeCalculator bankroll={bankroll} cur={cur} t={t} onClose={()=>setCalcOpen(false)}/>}
       {showPin&&<PinModal t={t} onSuccess={checkPin} onCancel={()=>{setShowPin(false);setPendingPage(null);}}/>}
       <Toast msg={toast.msg} type={toast.type} onClose={closeToast}/>
 
@@ -962,12 +1169,12 @@ export default function App(){
 
       {/* Content */}
       <main style={{paddingBottom:80}}>
-        {page==="dashboard"&&<Dashboard bankroll={bankroll} initialBankroll={data?.bankroll?.initial||bankroll} bets={bets} isAdmin={isAdmin} onPage={navTo} onStatus={handleStatus} onDelete={handleDelete} cur={cur} t={t}/>}
+        {page==="dashboard"&&<Dashboard bankroll={bankroll} initialBankroll={data?.bankroll?.initial||bankroll} bets={bets} isAdmin={isAdmin} onPage={navTo} onStatus={handleStatus} onDelete={handleDelete} onDuplicate={handleDuplicate} cur={cur} t={t} onCalc={()=>setCalcOpen(true)}/>}
         {page==="newbet"&&(isAdmin?<NewBet bankroll={bankroll} onAdd={handleAddBet} onBack={()=>setPage("dashboard")} showToast={showToast} t={t} lang={lang}/>:<AccessDenied/>)}
-        {page==="history"&&<History bets={bets} isAdmin={isAdmin} onStatus={handleStatus} onDelete={handleDelete} cur={cur} t={t}/>}
+        {page==="history"&&<History bets={bets} isAdmin={isAdmin} onStatus={handleStatus} onDelete={handleDelete} onDuplicate={handleDuplicate} cur={cur} t={t}/>}
         {page==="stats"&&<Stats bets={bets} bankroll={bankroll} initialBankroll={data?.bankroll?.initial||bankroll} cur={cur} t={t}/>}
         {page==="bilan"&&<Bilan bets={bets} cur={cur} t={t}/>}
-        {page==="settings"&&(isAdmin?<Settings bankroll={bankroll} onUpdateBankroll={handleUpdateBankroll} onResetRequest={handleResetRequest} onChangePin={p=>persist({...data,pin:p})} cur={cur} onCurChange={handleCurChange} lang={lang} onLangChange={handleLangChange} showToast={showToast} t={t}/>:<AccessDenied/>)}
+        {page==="settings"&&(isAdmin?<Settings bankroll={bankroll} onUpdateBankroll={handleUpdateBankroll} onResetRequest={handleResetRequest} onChangePin={p=>persist({...data,pin:p})} cur={cur} onCurChange={handleCurChange} lang={lang} onLangChange={handleLangChange} lightMode={lightMode} onToggleLight={toggleLight} showToast={showToast} t={t}/>:<AccessDenied/>)}
       </main>
 
       {/* Mobile bottom bar with hamburger */}
