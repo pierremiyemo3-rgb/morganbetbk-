@@ -1,22 +1,45 @@
 {
   "name": "MorganbetBK",
   "short_name": "MorganbetBK",
-  "description": "Gestionnaire de bankroll sportif professionnel",
-  "start_url": "/?source=pwa",
+  "description": "Gestionnaire de bankroll sportif professionnel — Statistiques style trading, bilans hebdo/mensuels",
+  "start_url": "/",
+  "id": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#060e1a",
   "theme_color": "#f59e0b",
   "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ],
+  "scope": "/",
+  "prefer_related_applications": false,
   "categories": ["finance", "sports"],
   "lang": "fr",
-  "scope": "/",
-  "prefer_related_applications": false
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard MorganbetBK"
+    }
+  ]
 }

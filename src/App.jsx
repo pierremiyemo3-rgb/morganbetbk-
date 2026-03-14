@@ -1673,7 +1673,7 @@ function ShareModal({url,title,onClose}){
     }
   };
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",backdropFilter:"blur(12px)",zIndex:999,display:"flex",alignItems:"flex-end",justifyContent:"center",padding:16}} onClick={onClose}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",backdropFilter:"blur(12px)",zIndex:1100,display:"flex",alignItems:"flex-end",justifyContent:"center",padding:16}} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{background:"#0b1929",border:"1px solid rgba(255,255,255,.12)",borderRadius:20,width:"100%",maxWidth:400,padding:"22px 18px 28px",marginBottom:"env(safe-area-inset-bottom,0)"}}>
         <div style={{width:36,height:3,background:"rgba(255,255,255,.2)",borderRadius:3,margin:"0 auto 18px"}}/>
         <h3 style={{color:"#eef2f7",fontWeight:800,fontSize:17,margin:"0 0 6px",textAlign:"center"}}>{title}</h3>
@@ -1686,16 +1686,23 @@ function ShareModal({url,title,onClose}){
           </button>
         </div>
         {/* Share options */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:10}}>
           {[
-            ["💬","WhatsApp",()=>window.open(`https://wa.me/?text=${encodeURIComponent(title+" — "+url)}`)],
-            ["📱","Natif / Autres",()=>navigator.share?.({title,url}).catch(()=>{})],
-            ["📋","Copier le lien",()=>copy()],
-            ["✉️","Email",()=>window.open(`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent("Mes stats MorganbetBK : "+url)}`)],
-          ].map(([icon,label,fn],i)=>(
-            <button key={i} onClick={()=>{fn();}} style={{padding:"12px 8px",borderRadius:12,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.03)",color:"#eef2f7",cursor:"pointer",fontFamily:"inherit",fontSize:13,display:"flex",flexDirection:"column",alignItems:"center",gap:5}}>
+            ["💬","WhatsApp","#25d366",()=>window.open(`https://wa.me/?text=${encodeURIComponent(title+" — "+url)}`)],
+            ["✈️","Telegram","#229ed9",()=>window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`)],
+            ["📘","Facebook","#1877f2",()=>window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`)],
+            ["📸","Instagram","#e1306c",()=>{copy();window.open("https://www.instagram.com","_blank");setTimeout(()=>alert("Lien copié ! Colle-le dans ta bio ou story Instagram 📸"),500);}],
+            ["📋","Copier",C.gold,()=>copy()],
+            ["✉️","Email","#7a9ab8",()=>window.open(`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent("Mes stats MorganbetBK : "+url)}`)],
+            ["📱","Autres","#94a3b8",()=>navigator.share?.({title,url}).catch(()=>{})],
+            ["🔗","Lien direct","#38bdf8",()=>{copy();alert("Lien copié :
+"+url);}],
+          ].map(([icon,label,col,fn],i)=>(
+            <button key={i} onClick={()=>{fn();}} style={{padding:"12px 6px",borderRadius:12,border:`1px solid ${col}22`,background:`${col}11`,color:"#eef2f7",cursor:"pointer",fontFamily:"inherit",fontSize:12,display:"flex",flexDirection:"column",alignItems:"center",gap:5,transition:"all .15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background=`${col}22`;}}
+              onMouseLeave={e=>{e.currentTarget.style.background=`${col}11`;}}>
               <span style={{fontSize:22}}>{icon}</span>
-              <span style={{fontSize:11,color:"#7a9ab8"}}>{label}</span>
+              <span style={{fontSize:10,color:"#7a9ab8"}}>{label}</span>
             </button>
           ))}
         </div>
@@ -1920,7 +1927,8 @@ export default function App(){
               <div style={{color:C.gold,fontWeight:800,fontSize:14}}>{cur==="XAF"?fXaf(bankroll):fEur(bankroll)}</div>
               <div style={{color:C.muted,fontSize:10}}>{cur==="XAF"?fEur(bankroll):fXaf(bankroll)}</div>
             </div>
-            {isAdmin?<button onClick={()=>setIsAdmin(false)} style={{background:"rgba(139,92,246,.15)",border:"1px solid rgba(139,92,246,.3)",borderRadius:20,padding:"4px 10px",color:"#a78bfa",fontSize:11,fontWeight:700,cursor:"pointer"}}>🔐 Admin</button>:<button onClick={()=>setShowPin(true)} style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:20,padding:"4px 10px",color:C.muted,fontSize:11,cursor:"pointer"}}>🔒 {t.login}</button>}
+            <button onClick={()=>setShareModal({url:window.location.origin+"?p=stats",title:"MorganbetBK — Mes statistiques"})} style={{padding:"6px 12px",borderRadius:9,border:`1px solid ${C.goldBorder}`,background:C.goldDim,color:C.gold,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>📤 Partager</button>
+          {isAdmin?<button onClick={()=>setIsAdmin(false)} style={{background:"rgba(139,92,246,.15)",border:"1px solid rgba(139,92,246,.3)",borderRadius:20,padding:"4px 10px",color:"#a78bfa",fontSize:11,fontWeight:700,cursor:"pointer"}}>🔐 Admin</button>:<button onClick={()=>setShowPin(true)} style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:20,padding:"4px 10px",color:C.muted,fontSize:11,cursor:"pointer"}}>🔒 {t.login}</button>}
           </div>
         </div>
       </nav>
@@ -2013,6 +2021,10 @@ export default function App(){
           </button>
         ))}
         <div style={{borderTop:`1px solid ${C.border}`,paddingTop:10,marginTop:4}}>
+          {/* Share button */}
+          <button onClick={()=>{setMenuOpen(false);setShareModal({url:window.location.origin+"?p=stats",title:"MorganbetBK — Mes statistiques"});}} style={{width:"100%",padding:"12px",borderRadius:12,border:`1px solid ${C.goldBorder}`,background:C.goldDim,color:C.gold,fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:10}}>
+            📤 Partager mes statistiques
+          </button>
           <div style={{color:C.muted,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Langue / Language</div>
           <div style={{display:"flex",gap:6}}>
             {[["fr","🇫🇷 FR"],["en","🇬🇧 EN"],["it","🇮🇹 IT"]].map(([l,label])=>(
