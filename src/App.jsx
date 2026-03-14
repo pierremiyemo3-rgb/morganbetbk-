@@ -1710,7 +1710,16 @@ function ShareModal({url,title,onClose}){
 
 /* ═══════════════════════ MAIN APP ═══════════════════════ */
 export default function App(){
-  const [page,setPage]=useState("landing");
+  const getInitialPage=()=>{
+    try{
+      const p=new URLSearchParams(window.location.search).get("p");
+      const h=window.location.hash.replace("#","");
+      const t=p||h;
+      if(["stats","dashboard","history","bilan"].includes(t))return t;
+    }catch{}
+    return "landing";
+  };
+  const [page,setPage]=useState(getInitialPage);
   const [data,setData]=useState(null);
   const [loading,setLoading]=useState(true);
   const [isAdmin,setIsAdmin]=useState(false);
@@ -1767,15 +1776,7 @@ export default function App(){
       setTimeout(()=>checkAndSendNotifications(d,d?.lang||"fr"),2000);
       setTimeout(()=>{ if(window.updateSwData)window.updateSwData(d); },3000);
     }
-    // ── URL params: ?stats, ?bilans, ?history → go direct ──
-    const params=new URLSearchParams(window.location.search);
-    const hash=window.location.hash.replace("#","");
-    const target=params.get("p")||hash;
-    if(["stats","dashboard","history","bilan"].includes(target)){
-      setPage(target);
-    } else {
-      setPage("landing");
-    }
+    // Page already set from URL on initial load
     setLoading(false);
   }); },[]);
 
