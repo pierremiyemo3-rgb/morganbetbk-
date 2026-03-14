@@ -1754,6 +1754,7 @@ export default function App(){
     else {
       const empty={bankroll:{eur:0,initial:0,setup:false},bets:[],pin:DEFAULT_PIN,lang:"fr",cur:"EUR"};
       setData(empty); saveData(empty);
+      d=empty;
     }
     if(d?.goal)setGoalEur(d.goal||0);
     // Check notification permission
@@ -1829,6 +1830,8 @@ export default function App(){
   // Apply theme
   C = lightMode ? LIGHT : DARK;
   if(loading)return <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{color:C.gold,fontSize:22}}>⏳</div></div>;
+  // If data not loaded yet but page is set, wait
+  if(!data&&page!=="landing")return <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{color:C.gold,fontSize:22}}>⏳</div></div>;
   if(page==="landing")return <Landing t={t} lang={lang} setLang={handleLangChange} onEnter={()=>setPage("dashboard")}/>;
   // Setup page removed - admin sets bankroll in Settings
 
