@@ -189,7 +189,7 @@ const MARKETS = {
 };
 
 /* ═══════════════════════ THEME ═══════════════════════ */
-const C = {
+let C = {
   bg:"#060e1a", bg2:"#0b1929", bg3:"#0f2035",
   border:"rgba(255,255,255,.07)", border2:"rgba(255,255,255,.12)",
   gold:"#f59e0b", goldDim:"rgba(245,158,11,.1)", goldBorder:"rgba(245,158,11,.22)",
@@ -197,6 +197,16 @@ const C = {
   green:"#10b981", greenDim:"rgba(16,185,129,.1)", greenBright:"#34d399",
   red:"#ef4444", redDim:"rgba(239,68,68,.1)", redBright:"#f87171",
   orange:"#f97316", accent:"#06b6d4",
+};
+const DARK = {...C};
+const LIGHT = {
+  bg:"#f0f4f8", bg2:"#ffffff", bg3:"#e8eef5",
+  border:"rgba(0,0,0,.1)", border2:"rgba(0,0,0,.15)",
+  gold:"#d97706", goldDim:"rgba(217,119,6,.08)", goldBorder:"rgba(217,119,6,.3)",
+  white:"#1a202c", muted:"#718096", sub:"#4a5568",
+  green:"#059669", greenDim:"rgba(5,150,105,.08)", greenBright:"#047857",
+  red:"#dc2626", redDim:"rgba(220,38,38,.08)", redBright:"#b91c1c",
+  orange:"#ea580c", accent:"#0284c7",
 };
 
 /* ═══════════════════════ HELPERS ═══════════════════════ */
@@ -333,13 +343,36 @@ function StatCard({label,value,sub,icon,color,spark,trend}){
 }
 
 /* ═══════════════════════ LOGO ═══════════════════════ */
+function LogoIcon({size=36}){
+  return(
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="10" fill="url(#lg)"/>
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#f59e0b"/>
+          <stop offset="100%" stopColor="#92400e"/>
+        </linearGradient>
+      </defs>
+      {/* Chart bars */}
+      <rect x="7" y="22" width="5" height="11" rx="2" fill="rgba(0,0,0,.35)"/>
+      <rect x="14" y="16" width="5" height="17" rx="2" fill="rgba(0,0,0,.25)"/>
+      <rect x="21" y="10" width="5" height="23" rx="2" fill="rgba(0,0,0,.3)"/>
+      <rect x="28" y="14" width="5" height="19" rx="2" fill="rgba(0,0,0,.25)"/>
+      {/* Trend line */}
+      <polyline points="9.5,26 16.5,20 23.5,13 30.5,17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      {/* Dot */}
+      <circle cx="30.5" cy="17" r="2.5" fill="white"/>
+    </svg>
+  );
+}
+
 function Logo({big}){
   return(
     <div style={{display:"flex",alignItems:"center",gap:big?12:8}}>
-      <div style={{width:big?44:32,height:big?44:32,borderRadius:big?12:9,background:"linear-gradient(135deg,#f59e0b,#d97706)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:big?24:17,flexShrink:0}}>⚽</div>
+      <LogoIcon size={big?46:34}/>
       <div>
-        <div style={{color:C.white,fontWeight:900,fontSize:big?23:15,letterSpacing:"-.4px",lineHeight:1}}>Morganbet<span style={{color:C.gold}}>BK</span></div>
-        {big&&<div style={{color:C.muted,fontSize:11,marginTop:2}}>Bankroll Manager Pro</div>}
+        <div style={{color:C.white,fontWeight:900,fontSize:big?22:15,letterSpacing:"-.5px",lineHeight:1}}>Morgan<span style={{color:"#f59e0b"}}>bet</span><span style={{color:C.sub,fontSize:big?14:11,fontWeight:700}}>BK</span></div>
+        {big&&<div style={{color:C.muted,fontSize:11,marginTop:3,letterSpacing:".5px",textTransform:"uppercase"}}>Bankroll Manager Pro</div>}
       </div>
     </div>
   );
@@ -347,37 +380,93 @@ function Logo({big}){
 
 /* ═══════════════════════ LANDING ═══════════════════════ */
 function Landing({t,lang,setLang,onEnter}){
+  const stats=[["98%","Précision des stats"],["67","Marchés disponibles"],["3","Devises supportées"]];
   return(
-    <div style={{minHeight:"100vh",background:C.bg,overflowX:"hidden"}}>
+    <div style={{minHeight:"100vh",background:"#04080f",overflowX:"hidden",fontFamily:"'Segoe UI',system-ui,sans-serif"}}>
+      {/* Background */}
       <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}>
-        <div style={{position:"absolute",width:"min(600px,120vw)",height:"min(600px,120vw)",borderRadius:"50%",background:"radial-gradient(circle,rgba(245,158,11,.1) 0%,transparent 65%)",top:"-15%",right:"-10%"}}/>
-        <div style={{position:"absolute",width:"min(400px,90vw)",height:"min(400px,90vw)",borderRadius:"50%",background:"radial-gradient(circle,rgba(16,185,129,.08) 0%,transparent 65%)",bottom:"5%",left:"-5%"}}/>
-        <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px)",backgroundSize:"44px 44px"}}/>
+        <div style={{position:"absolute",width:"70vw",height:"70vw",maxWidth:700,maxHeight:700,borderRadius:"50%",background:"radial-gradient(circle,rgba(245,158,11,.07) 0%,transparent 65%)",top:"-20%",right:"-15%"}}/>
+        <div style={{position:"absolute",width:"50vw",height:"50vw",maxWidth:500,maxHeight:500,borderRadius:"50%",background:"radial-gradient(circle,rgba(6,182,212,.05) 0%,transparent 65%)",bottom:"-10%",left:"-10%"}}/>
+        <div style={{position:"absolute",width:"40vw",height:"40vw",maxWidth:400,maxHeight:400,borderRadius:"50%",background:"radial-gradient(circle,rgba(16,185,129,.04) 0%,transparent 65%)",top:"40%",left:"30%"}}/>
+        <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px)",backgroundSize:"50px 50px"}}/>
       </div>
-      <div style={{position:"relative",zIndex:1,maxWidth:1000,margin:"0 auto",padding:"0 14px"}}>
-        <nav style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 0",gap:10,flexWrap:"wrap"}}>
+
+      <div style={{position:"relative",zIndex:1,maxWidth:1040,margin:"0 auto",padding:"0 16px"}}>
+        {/* Nav */}
+        <nav style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 0",gap:10,flexWrap:"wrap"}}>
           <Logo/>
           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
             <LangSwitcher lang={lang} setLang={setLang}/>
-            <Btn onClick={onEnter} sm>{t.access}</Btn>
+            <button onClick={onEnter} style={{padding:"9px 20px",borderRadius:10,border:"1px solid rgba(245,158,11,.4)",background:"transparent",color:"#f59e0b",fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
+              {t.access}
+            </button>
           </div>
         </nav>
-        <div style={{textAlign:"center",padding:"clamp(32px,7vw,70px) 0 clamp(24px,5vw,46px)"}}>
-          <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(245,158,11,.1)",border:"1px solid rgba(245,158,11,.25)",borderRadius:30,padding:"5px 16px",color:C.gold,fontSize:11,fontWeight:700,letterSpacing:1.1,textTransform:"uppercase",marginBottom:20}}>{t.badge}</div>
-          <h1 style={{color:C.white,fontSize:"clamp(26px,7vw,60px)",fontWeight:900,lineHeight:1.08,margin:"0 0 16px",fontFamily:"Georgia,serif"}}>
-            MorganbetBK.<br/><span style={{color:C.gold}}>{t.tagline}</span>
+
+        {/* Hero */}
+        <div style={{textAlign:"center",padding:"clamp(40px,8vw,90px) 0 clamp(30px,5vw,50px)"}}>
+          {/* Badge */}
+          <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",borderRadius:30,padding:"6px 18px",marginBottom:24}}>
+            <span style={{width:6,height:6,borderRadius:"50%",background:"#f59e0b",display:"inline-block",boxShadow:"0 0 8px #f59e0b"}}/>
+            <span style={{color:"#f59e0b",fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase"}}>{t.badge.replace("⚽ ","")}</span>
+          </div>
+
+          {/* Headline */}
+          <h1 style={{color:"#ffffff",fontSize:"clamp(28px,7vw,64px)",fontWeight:900,lineHeight:1.05,margin:"0 0 8px",letterSpacing:"-1px"}}>
+            Gérez votre bankroll
           </h1>
-          <p style={{color:C.sub,fontSize:"clamp(13px,2.5vw,17px)",maxWidth:520,margin:"0 auto 28px",lineHeight:1.75}}>{t.sub}</p>
-          <Btn onClick={onEnter} style={{padding:"13px 32px",fontSize:16}}>{t.start}</Btn>
+          <h1 style={{fontSize:"clamp(28px,7vw,64px)",fontWeight:900,lineHeight:1.05,margin:"0 0 22px",letterSpacing:"-1px",background:"linear-gradient(90deg,#f59e0b,#fcd34d,#f59e0b)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
+            comme un professionnel.
+          </h1>
+
+          {/* Sub */}
+          <p style={{color:"#7a9ab8",fontSize:"clamp(14px,2.5vw,18px)",maxWidth:560,margin:"0 auto 32px",lineHeight:1.8}}>
+            {lang==="it"?"Traccia ogni scommessa. Analizza le tue performance. Ottimizza la tua strategia con statistiche da trader professionista.":lang==="en"?"Track every bet. Analyse your performance. Optimise your strategy with professional trading-style analytics.":"Suivez chaque pari. Analysez vos performances. Optimisez votre stratégie avec des statistiques de niveau trader professionnel."}
+          </p>
+
+          {/* CTA */}
+          <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:50}}>
+            <button onClick={onEnter} style={{padding:"14px 36px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#000",fontWeight:800,fontSize:16,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 8px 32px rgba(245,158,11,.3)",letterSpacing:"-.2px"}}>
+              {t.start}
+            </button>
+            <button onClick={onEnter} style={{padding:"14px 28px",borderRadius:12,border:"1px solid rgba(255,255,255,.1)",background:"rgba(255,255,255,.04)",color:"#eef2f7",fontWeight:600,fontSize:15,cursor:"pointer",fontFamily:"inherit",backdropFilter:"blur(8px)"}}>
+              Voir la démo →
+            </button>
+          </div>
+
+          {/* Live stats bar */}
+          <div style={{display:"flex",justifyContent:"center",gap:"clamp(20px,5vw,60px)",flexWrap:"wrap",marginBottom:60}}>
+            {stats.map(([v,l],i)=>(
+              <div key={i} style={{textAlign:"center"}}>
+                <div style={{color:"#f59e0b",fontWeight:900,fontSize:"clamp(22px,5vw,36px)",letterSpacing:"-1px"}}>{v}</div>
+                <div style={{color:"#4d6680",fontSize:12,marginTop:2}}>{l}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,230px),1fr))",gap:11,paddingBottom:"clamp(28px,5vw,54px)"}}>
-          {t.feats.map(([i,title,desc],idx)=>(
-            <div key={idx} style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:13,padding:"17px 14px",textAlign:"center"}}>
-              <div style={{fontSize:27,marginBottom:8}}>{i}</div>
-              <div style={{color:C.white,fontWeight:700,fontSize:13,marginBottom:5}}>{title}</div>
-              <div style={{color:C.muted,fontSize:12,lineHeight:1.6}}>{desc}</div>
+
+        {/* Feature cards */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,220px),1fr))",gap:12,paddingBottom:60}}>
+          {t.feats.map(([icon,title,desc],idx)=>(
+            <div key={idx} style={{background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.06)",borderRadius:16,padding:"20px 16px",transition:"border-color .2s"}}
+              onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(245,158,11,.25)"}
+              onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,.06)"}>
+              <div style={{width:42,height:42,borderRadius:10,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,marginBottom:12}}>{icon}</div>
+              <div style={{color:"#eef2f7",fontWeight:700,fontSize:14,marginBottom:6}}>{title}</div>
+              <div style={{color:"#4d6680",fontSize:12,lineHeight:1.7}}>{desc}</div>
             </div>
           ))}
+        </div>
+
+        {/* Bottom CTA */}
+        <div style={{textAlign:"center",padding:"0 0 60px"}}>
+          <div style={{background:"linear-gradient(135deg,rgba(245,158,11,.08),rgba(6,182,212,.05))",border:"1px solid rgba(245,158,11,.15)",borderRadius:20,padding:"clamp(28px,5vw,50px) clamp(16px,4vw,40px)"}}>
+            <h2 style={{color:"#ffffff",fontWeight:900,fontSize:"clamp(20px,4vw,36px)",margin:"0 0 12px"}}>Prêt à prendre le contrôle ?</h2>
+            <p style={{color:"#7a9ab8",fontSize:"clamp(13px,2vw,16px)",margin:"0 0 24px"}}>Rejoignez les parieurs qui suivent leurs performances comme des traders.</p>
+            <button onClick={onEnter} style={{padding:"14px 40px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#000",fontWeight:800,fontSize:16,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 8px 32px rgba(245,158,11,.25)"}}>
+              {t.start}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1070,6 +1159,8 @@ export default function App(){
   const handleLangChange=l=>{ setLang(l); if(data)persist({...data,lang:l}); };
   const handleCurChange=c=>{ setCur(c); if(data)persist({...data,cur:c}); };
 
+  // Apply theme
+  C = lightMode ? LIGHT : DARK;
   if(loading)return <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{color:C.gold,fontSize:22}}>⏳</div></div>;
   if(page==="landing")return <Landing t={t} lang={lang} setLang={handleLangChange} onEnter={()=>setPage("dashboard")}/>;
   // Setup page removed - admin sets bankroll in Settings
