@@ -816,12 +816,7 @@ function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDele
         <div style={{display:"flex",gap:8}}>
           <Btn onClick={()=>onCalc&&onCalc()} sm v="ghost" style={{borderColor:C.goldBorder,color:C.gold}}>🧮 Calc</Btn>
           {isAdmin&&<Btn onClick={()=>onPage("newbet")} sm>{t.addBet}</Btn>}
-          <button onClick={()=>{
-            const url=window.location.origin+"?p=stats";
-            if(navigator.share){navigator.share({title:"MorganbetBK — Mes stats",url});}
-            else{navigator.clipboard?.writeText(url).then(()=>alert("Lien copié !
-"+url)).catch(()=>alert(url));}
-          }} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${C.border}`,background:"transparent",color:C.muted,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>📤</button>
+          <button onClick={()=>setShareModal({url:window.location.origin+"?p=stats",title:"MorganbetBK — Mes statistiques"})} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${C.border}`,background:"transparent",color:C.muted,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>📤</button>
         </div>
       </div>
       <div style={{background:"linear-gradient(135deg,rgba(245,158,11,.12),rgba(16,185,129,.06))",border:`1px solid ${C.goldBorder}`,borderRadius:18,padding:"16px 18px",marginBottom:12}}>
