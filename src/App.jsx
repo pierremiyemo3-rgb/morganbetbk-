@@ -200,13 +200,13 @@ let C = {
 };
 const DARK = {...C};
 const LIGHT = {
-  bg:"#f0f4f8", bg2:"#ffffff", bg3:"#e8eef5",
-  border:"rgba(0,0,0,.1)", border2:"rgba(0,0,0,.15)",
-  gold:"#d97706", goldDim:"rgba(217,119,6,.08)", goldBorder:"rgba(217,119,6,.3)",
-  white:"#1a202c", muted:"#718096", sub:"#4a5568",
-  green:"#059669", greenDim:"rgba(5,150,105,.08)", greenBright:"#047857",
-  red:"#dc2626", redDim:"rgba(220,38,38,.08)", redBright:"#b91c1c",
-  orange:"#ea580c", accent:"#0284c7",
+  bg:"#1a2235", bg2:"#1e293b", bg3:"#263347",
+  border:"rgba(255,255,255,.09)", border2:"rgba(255,255,255,.14)",
+  gold:"#fbbf24", goldDim:"rgba(251,191,36,.12)", goldBorder:"rgba(251,191,36,.3)",
+  white:"#f1f5f9", muted:"#64748b", sub:"#94a3b8",
+  green:"#22c55e", greenDim:"rgba(34,197,94,.1)", greenBright:"#4ade80",
+  red:"#f43f5e", redDim:"rgba(244,63,94,.1)", redBright:"#fb7185",
+  orange:"#fb923c", accent:"#38bdf8",
 };
 
 /* ═══════════════════════ HELPERS ═══════════════════════ */
@@ -366,13 +366,160 @@ function LogoIcon({size=36}){
   );
 }
 
-function Logo({big}){
+function Logo({big,onClick}){
+  // accent color changes with mode
+  const accent1=C.gold, accent2=C.accent;
   return(
-    <div style={{display:"flex",alignItems:"center",gap:big?12:8}}>
+    <div onClick={onClick} style={{display:"flex",alignItems:"center",gap:big?12:8,cursor:onClick?"pointer":"default",transition:"opacity .15s"}}
+      onMouseEnter={e=>{if(onClick)e.currentTarget.style.opacity=".8";}}
+      onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
       <LogoIcon size={big?46:34}/>
       <div>
-        <div style={{color:C.white,fontWeight:900,fontSize:big?22:15,letterSpacing:"-.5px",lineHeight:1}}>Morgan<span style={{color:"#f59e0b"}}>bet</span><span style={{color:C.sub,fontSize:big?14:11,fontWeight:700}}>BK</span></div>
-        {big&&<div style={{color:C.muted,fontSize:11,marginTop:3,letterSpacing:".5px",textTransform:"uppercase"}}>Bankroll Manager Pro</div>}
+        <div style={{color:C.white,fontWeight:900,fontSize:big?22:15,letterSpacing:"-.5px",lineHeight:1,transition:"color .3s"}}>
+          Morgan<span style={{color:accent1,transition:"color .3s"}}>bet</span><span style={{color:C.sub,fontSize:big?14:11,fontWeight:700,transition:"color .3s"}}>BK</span>
+        </div>
+        {big&&<div style={{fontSize:11,marginTop:3,letterSpacing:".5px",textTransform:"uppercase",background:`linear-gradient(90deg,${accent1},${accent2})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text",transition:"all .3s"}}>Bankroll Manager Pro</div>}
+        {!big&&<div style={{width:"100%",height:2,borderRadius:2,background:`linear-gradient(90deg,${accent1},${accent2})`,marginTop:2,transition:"all .3s"}}/>}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════ DEMO MODAL ═══════════════════════ */
+function DemoModal({onClose}){
+  const [slide,setSlide]=useState(0);
+  const slides=[
+    {
+      title:"📊 Dashboard en temps réel",
+      desc:"Suivez votre bankroll, profit NET, ROI et taux de réussite en un coup d'œil. Graphique d'évolution inclus.",
+      preview:(
+        <div style={{background:"#0b1929",borderRadius:12,padding:14,fontSize:11}}>
+          <div style={{color:"#f59e0b",fontWeight:800,fontSize:20,marginBottom:4}}>€1 250.00</div>
+          <div style={{color:"#34d399",fontSize:12,marginBottom:10}}>▲ +12.5% vs capital initial | Profit NET: +€138.50</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+            {[["💸 Mises","€890","#eef2f7"],["📈 ROI","+15.6%","#34d399"],["🎯 Win rate","67.3%","#fbbf24"]].map(([l,v,c],i)=>(
+              <div key={i} style={{background:"#0f2035",borderRadius:8,padding:"8px 6px",textAlign:"center"}}>
+                <div style={{color:"#4d6680",fontSize:9,marginBottom:2}}>{l}</div>
+                <div style={{color:c,fontWeight:800,fontSize:13}}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    },
+    {
+      title:"➕ Ajout de paris facile",
+      desc:"Simple ou combiné. Choisissez parmi 67 marchés, entrez vos équipes et la cote. Calcul automatique du gain potentiel.",
+      preview:(
+        <div style={{background:"#0b1929",borderRadius:12,padding:14,fontSize:11}}>
+          <div style={{display:"flex",gap:6,marginBottom:10}}>
+            <div style={{flex:1,padding:"8px",borderRadius:8,border:"2px solid #f59e0b",background:"rgba(245,158,11,.1)",color:"#f59e0b",fontWeight:700,textAlign:"center",fontSize:12}}>🎯 Simple</div>
+            <div style={{flex:1,padding:"8px",borderRadius:8,border:"1px solid rgba(255,255,255,.1)",color:"#4d6680",textAlign:"center",fontSize:12}}>🔗 Combiné</div>
+          </div>
+          {[["PSG","Lyon","GG","1.85"],["Real Madrid","Barça","Over 2.5","2.10"]].map(([h,a,m,c],i)=>(
+            <div key={i} style={{background:"#0f2035",borderRadius:8,padding:"8px 10px",marginBottom:6}}>
+              <div style={{color:"#eef2f7",fontWeight:700}}>{h} vs {a}</div>
+              <div style={{color:"#7a9ab8",fontSize:10}}>{m} · Cote ×{c}</div>
+            </div>
+          ))}
+          <div style={{background:"rgba(16,185,129,.1)",borderRadius:8,padding:"8px 10px",marginTop:8,display:"flex",justifyContent:"space-between"}}>
+            <span style={{color:"#7a9ab8"}}>Gain potentiel</span>
+            <span style={{color:"#34d399",fontWeight:800}}>+€38.85</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      title:"📅 Bilans automatiques",
+      desc:"Chaque paris est automatiquement classé par semaine et par mois. Profit NET, ROI et taux de réussite par période.",
+      preview:(
+        <div style={{background:"#0b1929",borderRadius:12,padding:14,fontSize:11}}>
+          {[["Semaine 11 · 2026","5 paris","▲ +€82.50","72%"],["Semaine 10 · 2026","7 paris","▼ -€23.00","43%"],["Semaine 9 · 2026","4 paris","▲ +€115.00","75%"]].map(([w,n,p,wr],i)=>(
+            <div key={i} style={{background:"#0f2035",borderRadius:8,padding:"9px 11px",marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{color:"#eef2f7",fontWeight:700,fontSize:12}}>{w}</div>
+                <div style={{color:"#4d6680",fontSize:10}}>{n}</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{color:p.includes("+")?"#34d399":"#f87171",fontWeight:800}}>{p}</div>
+                <div style={{color:"#7a9ab8",fontSize:10}}>Win rate {wr}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    },
+    {
+      title:"🌍 Multi-langue & Multi-devise",
+      desc:"Interface disponible en Français, English et Italiano. Toutes les sommes affichées en EUR et XAF simultanément.",
+      preview:(
+        <div style={{background:"#0b1929",borderRadius:12,padding:14}}>
+          <div style={{display:"flex",gap:6,marginBottom:14}}>
+            {[["🇫🇷","FR",true],["🇬🇧","EN",false],["🇮🇹","IT",false]].map(([f,l,a],i)=>(
+              <div key={i} style={{flex:1,padding:"9px",borderRadius:8,border:`2px solid ${a?"#f59e0b":"rgba(255,255,255,.1)"}`,background:a?"rgba(245,158,11,.1)":"transparent",textAlign:"center",color:a?"#f59e0b":"#7a9ab8",fontWeight:700,fontSize:13}}>{f} {l}</div>
+            ))}
+          </div>
+          <div style={{background:"#0f2035",borderRadius:8,padding:10,textAlign:"center"}}>
+            <div style={{color:"#f59e0b",fontWeight:900,fontSize:22}}>€1 250.00</div>
+            <div style={{color:"#4d6680",fontSize:12,marginTop:3}}>819 998 XAF</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      title:"🔐 Mode Admin & Public",
+      desc:"Partagez l'URL publiquement — vos stats sont visibles par tous. Seul vous pouvez modifier avec votre code PIN.",
+      preview:(
+        <div style={{background:"#0b1929",borderRadius:12,padding:14}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
+            <div style={{background:"rgba(139,92,246,.1)",border:"1px solid rgba(139,92,246,.3)",borderRadius:8,padding:"10px",textAlign:"center"}}>
+              <div style={{fontSize:20,marginBottom:4}}>🔐</div>
+              <div style={{color:"#a78bfa",fontWeight:700,fontSize:12}}>Admin</div>
+              <div style={{color:"#4d6680",fontSize:10}}>Tout modifier</div>
+            </div>
+            <div style={{background:"rgba(6,182,212,.08)",border:"1px solid rgba(6,182,212,.2)",borderRadius:8,padding:"10px",textAlign:"center"}}>
+              <div style={{fontSize:20,marginBottom:4}}>👁️</div>
+              <div style={{color:"#38bdf8",fontWeight:700,fontSize:12}}>Public</div>
+              <div style={{color:"#4d6680",fontSize:10}}>Stats visibles</div>
+            </div>
+          </div>
+          <div style={{background:"#0f2035",borderRadius:8,padding:"9px 12px",display:"flex",justifyContent:"center",gap:10}}>
+            {[0,1,2,3].map(i=><div key={i} style={{width:12,height:12,borderRadius:"50%",background:i<2?"#f59e0b":"rgba(255,255,255,.1)"}}/>)}
+          </div>
+        </div>
+      )
+    },
+  ];
+  const s=slides[slide];
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",backdropFilter:"blur(20px)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:"#080f1c",border:"1px solid rgba(245,158,11,.2)",borderRadius:22,width:"100%",maxWidth:420,overflow:"hidden",boxShadow:"0 24px 80px rgba(0,0,0,.6)"}}>
+        {/* Header */}
+        <div style={{padding:"18px 20px 12px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid rgba(255,255,255,.06)"}}>
+          <div>
+            <div style={{color:"#f59e0b",fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:1.2,marginBottom:2}}>Démonstration</div>
+            <div style={{color:"#eef2f7",fontWeight:800,fontSize:16}}>{s.title}</div>
+          </div>
+          <button onClick={onClose} style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.08)",borderRadius:8,width:32,height:32,color:"#4d6680",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+        </div>
+        {/* Preview */}
+        <div style={{padding:"16px 20px"}}>{s.preview}</div>
+        {/* Description */}
+        <div style={{padding:"0 20px 14px",color:"#7a9ab8",fontSize:13,lineHeight:1.7}}>{s.desc}</div>
+        {/* Dots */}
+        <div style={{display:"flex",justifyContent:"center",gap:6,padding:"0 20px 16px"}}>
+          {slides.map((_,i)=>(
+            <button key={i} onClick={()=>setSlide(i)} style={{width:i===slide?24:8,height:8,borderRadius:4,border:"none",background:i===slide?"#f59e0b":"rgba(255,255,255,.15)",cursor:"pointer",transition:"all .25s"}}/>
+          ))}
+        </div>
+        {/* Nav */}
+        <div style={{display:"flex",gap:8,padding:"0 20px 20px"}}>
+          <button onClick={()=>setSlide(s=>Math.max(0,s-1))} disabled={slide===0} style={{flex:1,padding:"11px",borderRadius:10,border:"1px solid rgba(255,255,255,.1)",background:"transparent",color:slide===0?"#2d3748":"#eef2f7",fontWeight:700,cursor:slide===0?"default":"pointer",fontFamily:"inherit",fontSize:14}}>← Précédent</button>
+          {slide<slides.length-1
+            ?<button onClick={()=>setSlide(s=>s+1)} style={{flex:1,padding:"11px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#000",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:14}}>Suivant →</button>
+            :<button onClick={onClose} style={{flex:1,padding:"11px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:14}}>C'est parti ! 🚀</button>
+          }
+        </div>
       </div>
     </div>
   );
@@ -380,9 +527,11 @@ function Logo({big}){
 
 /* ═══════════════════════ LANDING ═══════════════════════ */
 function Landing({t,lang,setLang,onEnter}){
+  const [showDemo,setShowDemo]=useState(false);
   const stats=[["98%","Précision des stats"],["67","Marchés disponibles"],["3","Devises supportées"]];
   return(
     <div style={{minHeight:"100vh",background:"#04080f",overflowX:"hidden",fontFamily:"'Segoe UI',system-ui,sans-serif"}}>
+      {showDemo&&<DemoModal onClose={()=>setShowDemo(false)}/>}
       {/* Background */}
       <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}>
         <div style={{position:"absolute",width:"70vw",height:"70vw",maxWidth:700,maxHeight:700,borderRadius:"50%",background:"radial-gradient(circle,rgba(245,158,11,.07) 0%,transparent 65%)",top:"-20%",right:"-15%"}}/>
@@ -429,7 +578,7 @@ function Landing({t,lang,setLang,onEnter}){
             <button onClick={onEnter} style={{padding:"14px 36px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#000",fontWeight:800,fontSize:16,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 8px 32px rgba(245,158,11,.3)",letterSpacing:"-.2px"}}>
               {t.start}
             </button>
-            <button onClick={onEnter} style={{padding:"14px 28px",borderRadius:12,border:"1px solid rgba(255,255,255,.1)",background:"rgba(255,255,255,.04)",color:"#eef2f7",fontWeight:600,fontSize:15,cursor:"pointer",fontFamily:"inherit",backdropFilter:"blur(8px)"}}>
+            <button onClick={()=>setShowDemo(true)} style={{padding:"14px 28px",borderRadius:12,border:"1px solid rgba(255,255,255,.1)",background:"rgba(255,255,255,.04)",color:"#eef2f7",fontWeight:600,fontSize:15,cursor:"pointer",fontFamily:"inherit",backdropFilter:"blur(8px)"}}>
               Voir la démo →
             </button>
           </div>
@@ -1188,8 +1337,8 @@ export default function App(){
         .light-sub { color: ${lightMode ? '#4a5568' : ''} !important; }
       `}</style>
       <style>{`
-        *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-        *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+        *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;transition:background-color .3s,border-color .3s,color .2s;}
+        *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;transition:background-color .3s,border-color .3s,color .2s;}
         .mob-top{display:flex!important;}
         .desk-nav{display:none!important;}
         .bot-nav{display:flex!important;}
@@ -1223,7 +1372,7 @@ export default function App(){
 
       {/* Mobile top bar */}
       <div className="mob-top" style={{position:"sticky",top:0,zIndex:90,background:"rgba(6,14,26,.97)",backdropFilter:"blur(16px)",borderBottom:`1px solid ${C.border}`,padding:"10px 14px",alignItems:"center",justifyContent:"space-between"}}>
-        <Logo/>
+        <Logo onClick={()=>setPage('landing')}/>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <div style={{textAlign:"right"}}>
             <div style={{color:C.gold,fontWeight:800,fontSize:14}}>{cur==="XAF"?fXaf(bankroll):fEur(bankroll)}</div>
@@ -1239,7 +1388,7 @@ export default function App(){
       {/* Desktop nav */}
       <nav className="desk-nav" style={{position:"sticky",top:0,zIndex:90,background:"rgba(6,14,26,.96)",backdropFilter:"blur(16px)",borderBottom:`1px solid ${C.border}`}}>
         <div style={{maxWidth:1100,margin:"0 auto",padding:"0 16px",display:"flex",alignItems:"center"}}>
-          <div style={{padding:"12px 0",marginRight:20,cursor:"pointer"}} onClick={()=>setPage("dashboard")}><Logo/></div>
+          <div style={{padding:"12px 0",marginRight:20}}><Logo onClick={()=>setPage('landing')}/></div>
           <div style={{display:"flex",flex:1,gap:0,overflowX:"auto"}}>
             {NAV.map(n=>(
               <button key={n.id} onClick={()=>navTo(n.id)} style={{padding:"15px 12px",background:"none",border:"none",borderBottom:`2px solid ${page===n.id?C.gold:"transparent"}`,color:page===n.id?C.gold:n.admin?"#a78bfa":C.muted,fontWeight:page===n.id?700:500,cursor:"pointer",fontSize:13,fontFamily:"inherit",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:5}}>
