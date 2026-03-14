@@ -902,8 +902,18 @@ export default function App(){
     <div style={{minHeight:"100vh",background:C.bg,fontFamily:"'Segoe UI',system-ui,sans-serif"}}>
       <style>{`
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-        .mob-top{display:flex;}.desk-nav{display:none;}.bot-nav{display:flex;}
-        @media(min-width:640px){.mob-top{display:none!important;}.desk-nav{display:block!important;}.bot-nav{display:none!important;}}
+        *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+        .mob-top{display:flex!important;}
+        .desk-nav{display:none!important;}
+        .bot-nav{display:flex!important;}
+        @media(min-width:640px){
+          .mob-top{display:none!important;}
+          .desk-nav{display:block!important;}
+          .bot-nav{display:none!important;}
+        }
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.5;cursor:pointer;}
+        input:focus,select:focus{border-color:rgba(245,158,11,.5)!important;box-shadow:0 0 0 3px rgba(245,158,11,.07);}
+        ::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px;}
         input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.5;cursor:pointer;}
         input:focus,select:focus{border-color:rgba(245,158,11,.5)!important;box-shadow:0 0 0 3px rgba(245,158,11,.07);}
         ::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px;}
@@ -961,7 +971,7 @@ export default function App(){
       </main>
 
       {/* Mobile bottom bar with hamburger */}
-      <div className="bot-nav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:90,background:"rgba(6,14,26,.97)",backdropFilter:"blur(16px)",borderTop:`1px solid ${C.border}`,display:"none",paddingBottom:"env(safe-area-inset-bottom,0)",alignItems:"center",justifyContent:"space-around",padding:"8px 10px"}}>
+      <div className="bot-nav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:90,background:"rgba(6,14,26,.97)",backdropFilter:"blur(16px)",borderTop:`1px solid ${C.border}`,paddingBottom:"env(safe-area-inset-bottom,0)",alignItems:"center",justifyContent:"space-around",padding:"8px 10px"}}>
         {/* Quick access: 3 main pages */}
         {[NAV[0],NAV[1],NAV[2]].map(n=>(
           <button key={n.id} onClick={()=>{navTo(n.id);setMenuOpen(false);}} style={{flex:1,padding:"6px 2px",background:"none",border:"none",color:page===n.id?C.gold:C.muted,cursor:"pointer",fontFamily:"inherit",display:"flex",flexDirection:"column",alignItems:"center",gap:2,position:"relative"}}>
@@ -979,7 +989,7 @@ export default function App(){
 
       {/* Mobile slide-up menu */}
       {menuOpen&&<div style={{position:"fixed",inset:0,zIndex:89,background:"rgba(0,0,0,.6)",backdropFilter:"blur(4px)"}} onClick={()=>setMenuOpen(false)}/>}
-      <div className="bot-nav" style={{position:"fixed",bottom:menuOpen?60:"-100%",left:0,right:0,zIndex:89,background:"rgba(6,14,26,.99)",backdropFilter:"blur(20px)",borderTop:`2px solid ${C.goldBorder}`,borderRadius:"20px 20px 0 0",display:"none",flexDirection:"column",padding:"16px 16px calc(env(safe-area-inset-bottom,0px) + 16px)",gap:8,transition:"bottom .3s cubic-bezier(.4,0,.2,1)"}}>
+      <div className="bot-nav" style={{position:"fixed",bottom:menuOpen?60:"-100%",left:0,right:0,zIndex:89,background:"rgba(6,14,26,.99)",backdropFilter:"blur(20px)",borderTop:`2px solid ${C.goldBorder}`,borderRadius:"20px 20px 0 0",display:"flex",flexDirection:"column",padding:"16px 16px calc(env(safe-area-inset-bottom,0px) + 16px)",gap:8,transition:"bottom .3s cubic-bezier(.4,0,.2,1)"}}>
         <div style={{textAlign:"center",marginBottom:4}}>
           <div style={{width:36,height:3,background:C.border2,borderRadius:3,margin:"0 auto 10px"}}/>
           <div style={{color:C.muted,fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase"}}>Navigation</div>
