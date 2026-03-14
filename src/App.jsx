@@ -816,6 +816,12 @@ function Dashboard({bankroll,initialBankroll,bets,isAdmin,onPage,onStatus,onDele
         <div style={{display:"flex",gap:8}}>
           <Btn onClick={()=>onCalc&&onCalc()} sm v="ghost" style={{borderColor:C.goldBorder,color:C.gold}}>🧮 Calc</Btn>
           {isAdmin&&<Btn onClick={()=>onPage("newbet")} sm>{t.addBet}</Btn>}
+          <button onClick={()=>{
+            const url=window.location.origin+"?p=stats";
+            if(navigator.share){navigator.share({title:"MorganbetBK — Mes stats",url});}
+            else{navigator.clipboard?.writeText(url).then(()=>alert("Lien copié !
+"+url)).catch(()=>alert(url));}
+          }} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${C.border}`,background:"transparent",color:C.muted,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>📤</button>
         </div>
       </div>
       <div style={{background:"linear-gradient(135deg,rgba(245,158,11,.12),rgba(16,185,129,.06))",border:`1px solid ${C.goldBorder}`,borderRadius:18,padding:"16px 18px",marginBottom:12}}>
@@ -990,9 +996,28 @@ function Stats({bets,bankroll,initialBankroll,cur,t}){
   bets.forEach(b=>{if(b.status==="pending"||b.status==="refunded")return;b.selections.forEach(s=>{if(!mkts[s.market])mkts[s.market]={w:0,l:0,n:0,staked:0,returned:0};mkts[s.market].n++;if(b.status==="won"){mkts[s.market].w++;mkts[s.market].returned+=b.potentialGainEur;}else mkts[s.market].l++;mkts[s.market].staked+=b.stakeEur;});});
   return(
     <div style={{maxWidth:940,margin:"0 auto",padding:"14px 12px"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
-        <h2 style={{color:C.white,fontWeight:900,fontSize:"clamp(16px,4vw,22px)",margin:0}}>{t.statsTitle}</h2>
-        <div style={{background:C.goldDim,border:`1px solid ${C.goldBorder}`,borderRadius:20,padding:"3px 10px",fontSize:11,color:C.gold,fontWeight:700}}>{t.tradingBadge}</div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <h2 style={{color:C.white,fontWeight:900,fontSize:"clamp(16px,4vw,22px)",margin:0}}>{t.statsTitle}</h2>
+          <div style={{background:C.goldDim,border:`1px solid ${C.goldBorder}`,borderRadius:20,padding:"3px 10px",fontSize:11,color:C.gold,fontWeight:700}}>{t.tradingBadge}</div>
+        </div>
+        <div style={{display:"flex",gap:6}}>
+          <button onClick={()=>{
+            const url=window.location.origin+"?p=stats";
+            if(navigator.share){navigator.share({title:"MorganbetBK — Mes statistiques",text:"Découvrez mes stats de paris sportifs sur MorganbetBK",url});}
+            else{navigator.clipboard?.writeText(url).then(()=>alert("Lien copié ! "+url)).catch(()=>alert("Lien : "+url));}
+          }} style={{padding:"7px 12px",borderRadius:10,border:`1px solid ${C.goldBorder}`,background:C.goldDim,color:C.gold,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:5}}>
+            📤 Partager
+          </button>
+          <button onClick={()=>{
+            const url=window.location.origin+"?p=stats";
+            navigator.clipboard?.writeText(url).then(()=>alert("✅ Lien copié !
+
+"+url)).catch(()=>alert("Lien : "+url));
+          }} style={{padding:"7px 12px",borderRadius:10,border:`1px solid ${C.border}`,background:"transparent",color:C.sub,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:5}}>
+            🔗 Copier le lien
+          </button>
+        </div>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:8,marginBottom:13}}>
         <StatCard label="Bankroll départ" value={fAmt(initialBankroll,cur)} icon="🏦" color={C.gold} sub={cur==="XAF"?fEur(initialBankroll):fXaf(initialBankroll)}/>
@@ -1142,6 +1167,25 @@ function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCu
   return(
     <div style={{maxWidth:580,margin:"0 auto",padding:"14px 12px"}}>
       <h2 style={{color:C.white,fontWeight:900,fontSize:"clamp(16px,4vw,22px)",margin:"0 0 12px"}}>{t.settingsTitle}</h2>
+      <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 15px",marginBottom:9}}>
+        <h4 style={{color:C.white,margin:"0 0 12px",fontSize:14}}>🔗 Liens publics à partager</h4>
+        {[
+          ["📊 Mes statistiques",window.location.origin+"?p=stats","Partage tes chiffres clés"],
+          ["🏠 Dashboard",window.location.origin+"?p=dashboard","Vue générale de ta bankroll"],
+          ["📅 Bilans",window.location.origin+"?p=bilan","Tes rapports hebdo/mensuels"],
+        ].map(([label,url,desc],i)=>(
+          <div key={i} style={{background:C.bg3,borderRadius:10,padding:"10px 12px",marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+            <div style={{minWidth:0,flex:1}}>
+              <div style={{color:C.white,fontWeight:700,fontSize:13}}>{label}</div>
+              <div style={{color:C.muted,fontSize:11,marginTop:1}}>{desc}</div>
+            </div>
+            <div style={{display:"flex",gap:6,flexShrink:0}}>
+              <button onClick={()=>navigator.clipboard?.writeText(url).then(()=>showToast("Lien copié ✓","success")).catch(()=>showToast(url,"info"))} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${C.border2}`,background:"transparent",color:C.sub,fontSize:11,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>📋 Copier</button>
+              <button onClick={()=>{if(navigator.share){navigator.share({title:"MorganbetBK",url});}else{navigator.clipboard?.writeText(url).then(()=>showToast("Lien copié ✓","success"));}}} style={{padding:"6px 10px",borderRadius:8,border:"none",background:C.goldDim,color:C.gold,fontSize:11,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>📤</button>
+            </div>
+          </div>
+        ))}
+      </div>
       <div style={{background:notifGranted?"rgba(16,185,129,.08)":"rgba(245,158,11,.08)",border:`1px solid ${notifGranted?C.green:C.goldBorder}`,borderRadius:14,padding:"12px 15px",marginBottom:9}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
           <div>
@@ -1636,7 +1680,6 @@ export default function App(){
   useEffect(()=>{ loadData().then(d=>{
     if(d){ setData(d); if(d.lang)setLang(d.lang); if(d.cur)setCur(d.cur); }
     else {
-      // Auto-init empty data so public users always see dashboard
       const empty={bankroll:{eur:0,initial:0,setup:false},bets:[],pin:DEFAULT_PIN,lang:"fr",cur:"EUR"};
       setData(empty); saveData(empty);
     }
@@ -1648,6 +1691,15 @@ export default function App(){
     }
     // Run notification checks after load
     if(d)setTimeout(()=>checkAndSendNotifications(d,d?.lang||"fr"),2000);
+    // ── URL params: ?stats, ?bilans, ?history → go direct ──
+    const params=new URLSearchParams(window.location.search);
+    const hash=window.location.hash.replace("#","");
+    const target=params.get("p")||hash;
+    if(["stats","dashboard","history","bilan"].includes(target)){
+      setPage(target);
+    } else {
+      setPage("landing");
+    }
     setLoading(false);
   }); },[]);
 
