@@ -60,3 +60,49 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </ErrorBoundary>
 )
+
+// ── Service Worker Registration (Android notifications) ──────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      console.log('SW registered:', reg.scope);
+
+      // Request periodic sync if supported (Android Chrome)
+      if ('periodicSync' in reg) {
+        try {
+          await reg.periodicSync.register('check-notifications', {
+            minInterval: 60 * 60 * 1000, // 1 heure minimum
+          });
+          console.log('Periodic sync registered');
+        } catch (e) {
+          console.log('Periodic sync not supported:', e);
+        }
+      }
+
+      // Expose SW for use in app
+      window.swRegistration = reg;
+
+    } catch (err) {
+      console.warn('SW registration failed:', err);
+    }
+  });
+}
+
+// ── Helper to send data to SW for background checks ──────────────────────────
+window.updateSwData = (data) => {
+  if (!window.swRegistration) return;
+  const sw = window.swRegistration.active || window.swRegistration.installing;
+  if (sw) {
+    sw.postMessage({
+      type: 'SCHEDULE_NOTIFICATIONS',
+      data: {
+        bets: data.bets || [],
+        bankroll: data.bankroll?.eur || 0,
+        goal: data.goal || 0,
+        lang: data.lang || 'fr',
+        lastCheck: 0,
+      }
+    });
+  }
+};

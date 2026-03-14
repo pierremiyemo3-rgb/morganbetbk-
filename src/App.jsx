@@ -1690,7 +1690,10 @@ export default function App(){
       if(Notification.permission==="default")setShowNotifPrompt(true);
     }
     // Run notification checks after load
-    if(d)setTimeout(()=>checkAndSendNotifications(d,d?.lang||"fr"),2000);
+    if(d){
+      setTimeout(()=>checkAndSendNotifications(d,d?.lang||"fr"),2000);
+      setTimeout(()=>{ if(window.updateSwData)window.updateSwData(d); },3000);
+    }
     // ── URL params: ?stats, ?bilans, ?history → go direct ──
     const params=new URLSearchParams(window.location.search);
     const hash=window.location.hash.replace("#","");
@@ -1703,7 +1706,13 @@ export default function App(){
     setLoading(false);
   }); },[]);
 
-  const persist=useCallback(nd=>{ setData(nd); saveData(nd); setTimeout(()=>checkAndSendNotifications(nd,nd?.lang||lang),500); },[lang]);
+  const persist=useCallback(nd=>{
+    setData(nd);
+    saveData(nd);
+    setTimeout(()=>checkAndSendNotifications(nd,nd?.lang||lang),500);
+    // Send data to Service Worker for Android background notifications
+    if(window.updateSwData)window.updateSwData(nd);
+  },[lang]);
   const toggleLight=()=>setLightMode(m=>!m);
 
   const checkPin=(entered,onFail)=>{
