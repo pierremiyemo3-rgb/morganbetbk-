@@ -1690,8 +1690,7 @@ function ShareModal({url,title,onClose}){
             ["📋","Copier",C.gold,()=>copy()],
             ["✉️","Email","#7a9ab8",()=>window.open(`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent("Mes stats MorganbetBK : "+url)}`)],
             ["📱","Autres","#94a3b8",()=>navigator.share?.({title,url}).catch(()=>{})],
-            ["🔗","Lien direct","#38bdf8",()=>{copy();alert("Lien copié :
-"+url);}],
+            ["🔗","Lien direct","#38bdf8",()=>{copy();alert("Lien copié : "+url);}],
           ].map(([icon,label,col,fn],i)=>(
             <button key={i} onClick={()=>{fn();}} style={{padding:"12px 6px",borderRadius:12,border:`1px solid ${col}22`,background:`${col}11`,color:"#eef2f7",cursor:"pointer",fontFamily:"inherit",fontSize:12,display:"flex",flexDirection:"column",alignItems:"center",gap:5,transition:"all .15s"}}
               onMouseEnter={e=>{e.currentTarget.style.background=`${col}22`;}}
