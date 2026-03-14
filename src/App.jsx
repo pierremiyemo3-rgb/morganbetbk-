@@ -969,7 +969,7 @@ function History({bets,isAdmin,onStatus,onDelete,onDuplicate,cur,t}){
 }
 
 /* ═══════════════════════ STATS ═══════════════════════ */
-function Stats({bets,bankroll,initialBankroll,cur,t}){
+function Stats({bets,bankroll,initialBankroll,cur,t,onShare}){
   const won=bets.filter(b=>b.status==="won"), lost=bets.filter(b=>b.status==="lost");
   const pending=bets.filter(b=>b.status==="pending"), refunded=bets.filter(b=>b.status==="refunded");
   const resolved=[...won,...lost];
@@ -1002,20 +1002,8 @@ function Stats({bets,bankroll,initialBankroll,cur,t}){
           <div style={{background:C.goldDim,border:`1px solid ${C.goldBorder}`,borderRadius:20,padding:"3px 10px",fontSize:11,color:C.gold,fontWeight:700}}>{t.tradingBadge}</div>
         </div>
         <div style={{display:"flex",gap:6}}>
-          <button onClick={()=>{
-            const url=window.location.origin+"?p=stats";
-            if(navigator.share){navigator.share({title:"MorganbetBK — Mes statistiques",text:"Découvrez mes stats de paris sportifs sur MorganbetBK",url});}
-            else{navigator.clipboard?.writeText(url).then(()=>alert("Lien copié ! "+url)).catch(()=>alert("Lien : "+url));}
-          }} style={{padding:"7px 12px",borderRadius:10,border:`1px solid ${C.goldBorder}`,background:C.goldDim,color:C.gold,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:5}}>
-            📤 Partager
-          </button>
-          <button onClick={()=>{
-            const url=window.location.origin+"?p=stats";
-            navigator.clipboard?.writeText(url).then(()=>alert("✅ Lien copié !
-
-"+url)).catch(()=>alert("Lien : "+url));
-          }} style={{padding:"7px 12px",borderRadius:10,border:`1px solid ${C.border}`,background:"transparent",color:C.sub,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:5}}>
-            🔗 Copier le lien
+          <button onClick={()=>onShare&&onShare(window.location.origin+"?p=stats")} style={{padding:"7px 14px",borderRadius:10,border:`1px solid ${C.goldBorder}`,background:C.goldDim,color:C.gold,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:6}}>
+            📤 Partager mes stats
           </button>
         </div>
       </div>
@@ -1159,7 +1147,7 @@ function Bilan({bets,cur,t}){
 }
 
 /* ═══════════════════════ SETTINGS ═══════════════════════ */
-function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCurChange,lang,onLangChange,lightMode,onToggleLight,onExport,notifGranted,setNotifGranted,showToast,t}){
+function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCurChange,lang,onLangChange,lightMode,onToggleLight,onExport,onShare,notifGranted,setNotifGranted,showToast,t}){
   const [amt,setAmt]=useState(""), [amtCur,setAmtCur]=useState("EUR"), [mode,setMode]=useState("set");
   const [np,setNp]=useState(""), [np2,setNp2]=useState(""), [pe,setPe]=useState({});
   const apply=()=>{ const n=parseFloat(amt); if(!n||n<=0)return; onUpdateBankroll(amtCur==="EUR"?n:n/XAF,mode); setAmt(""); showToast(t.tBank,"success"); };
@@ -1180,8 +1168,7 @@ function Settings({bankroll,onUpdateBankroll,onResetRequest,onChangePin,cur,onCu
               <div style={{color:C.muted,fontSize:11,marginTop:1}}>{desc}</div>
             </div>
             <div style={{display:"flex",gap:6,flexShrink:0}}>
-              <button onClick={()=>navigator.clipboard?.writeText(url).then(()=>showToast("Lien copié ✓","success")).catch(()=>showToast(url,"info"))} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${C.border2}`,background:"transparent",color:C.sub,fontSize:11,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>📋 Copier</button>
-              <button onClick={()=>{if(navigator.share){navigator.share({title:"MorganbetBK",url});}else{navigator.clipboard?.writeText(url).then(()=>showToast("Lien copié ✓","success"));}}} style={{padding:"6px 10px",borderRadius:8,border:"none",background:C.goldDim,color:C.gold,fontSize:11,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>📤</button>
+              <button onClick={()=>onShare&&onShare(url)} style={{padding:"7px 14px",borderRadius:8,border:"none",background:C.goldDim,color:C.gold,fontSize:11,cursor:"pointer",fontFamily:"inherit",fontWeight:700,display:"flex",alignItems:"center",gap:4}}>📤 Partager</button>
             </div>
           </div>
         ))}
@@ -1650,6 +1637,76 @@ function checkAndSendNotifications(data,lang){
   setNotifState(state);
 }
 
+
+/* ═══════════════════════ SHARE HELPER ═══════════════════════ */
+function shareOrCopy(url, title, text, onSuccess){
+  // Try native share API first (iOS + Android)
+  if(navigator.share){
+    navigator.share({ title, text, url })
+      .then(()=>{ if(onSuccess)onSuccess(); })
+      .catch(()=>{ /* User cancelled */ });
+    return;
+  }
+  // Fallback: clipboard
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url)
+      .then(()=>{ if(onSuccess)onSuccess("copy"); })
+      .catch(()=>{ if(onSuccess)onSuccess("manual",url); });
+    return;
+  }
+  // Last resort: prompt
+  if(onSuccess)onSuccess("manual", url);
+}
+
+/* ═══════════════════════ SHARE MODAL ═══════════════════════ */
+function ShareModal({url,title,onClose}){
+  const [copied,setCopied]=useState(false);
+  const copy=()=>{
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(url).then(()=>setCopied(true));
+    } else {
+      // Select text fallback
+      const el=document.createElement("textarea");
+      el.value=url; document.body.appendChild(el); el.select();
+      document.execCommand("copy"); document.body.removeChild(el);
+      setCopied(true);
+    }
+  };
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",backdropFilter:"blur(12px)",zIndex:999,display:"flex",alignItems:"flex-end",justifyContent:"center",padding:16}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:"#0b1929",border:"1px solid rgba(255,255,255,.12)",borderRadius:20,width:"100%",maxWidth:400,padding:"22px 18px 28px",marginBottom:"env(safe-area-inset-bottom,0)"}}>
+        <div style={{width:36,height:3,background:"rgba(255,255,255,.2)",borderRadius:3,margin:"0 auto 18px"}}/>
+        <h3 style={{color:"#eef2f7",fontWeight:800,fontSize:17,margin:"0 0 6px",textAlign:"center"}}>{title}</h3>
+        <p style={{color:"#4d6680",fontSize:12,textAlign:"center",margin:"0 0 18px"}}>Partage ce lien avec tes abonnés</p>
+        {/* URL preview */}
+        <div style={{background:"#0f2035",borderRadius:10,padding:"10px 14px",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+          <span style={{color:"#7a9ab8",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{url}</span>
+          <button onClick={copy} style={{background:copied?"rgba(16,185,129,.2)":"rgba(245,158,11,.1)",border:`1px solid ${copied?"#10b981":"rgba(245,158,11,.3)"}`,borderRadius:7,padding:"5px 10px",color:copied?"#34d399":"#f59e0b",fontWeight:700,fontSize:11,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>
+            {copied?"✓ Copié !":"📋 Copier"}
+          </button>
+        </div>
+        {/* Share options */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
+          {[
+            ["💬","WhatsApp",()=>window.open(`https://wa.me/?text=${encodeURIComponent(title+" — "+url)}`)],
+            ["📱","Natif / Autres",()=>navigator.share?.({title,url}).catch(()=>{})],
+            ["📋","Copier le lien",()=>copy()],
+            ["✉️","Email",()=>window.open(`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent("Mes stats MorganbetBK : "+url)}`)],
+          ].map(([icon,label,fn],i)=>(
+            <button key={i} onClick={()=>{fn();}} style={{padding:"12px 8px",borderRadius:12,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.03)",color:"#eef2f7",cursor:"pointer",fontFamily:"inherit",fontSize:13,display:"flex",flexDirection:"column",alignItems:"center",gap:5}}>
+              <span style={{fontSize:22}}>{icon}</span>
+              <span style={{fontSize:11,color:"#7a9ab8"}}>{label}</span>
+            </button>
+          ))}
+        </div>
+        <button onClick={onClose} style={{width:"100%",padding:"12px",borderRadius:12,border:"1px solid rgba(255,255,255,.1)",background:"transparent",color:"#4d6680",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:14}}>
+          Fermer
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════ MAIN APP ═══════════════════════ */
 export default function App(){
   const [page,setPage]=useState("landing");
@@ -1667,6 +1724,9 @@ export default function App(){
   const [calcOpen,setCalcOpen]=useState(false);
   const [goalEur,setGoalEur]=useState(0);
   const [menuOpen,setMenuOpen]=useState(false);
+  const [shareModal,setShareModal]=useState(null);
+  const [installPrompt,setInstallPrompt]=useState(null);
+  const [showInstallBanner,setShowInstallBanner]=useState(false);
   const [notifGranted,setNotifGranted]=useState(false);
   const [showNotifPrompt,setShowNotifPrompt]=useState(false);
   const t=T[lang];
@@ -1676,6 +1736,17 @@ export default function App(){
   const askConfirm=(cfg,onOk)=>{ setConfirmCfg(cfg); confirmCb.current=onOk; };
   const handleConfirmOk=()=>{ setConfirmCfg(null); confirmCb.current&&confirmCb.current(); confirmCb.current=null; };
   const handleConfirmCancel=()=>{ setConfirmCfg(null); confirmCb.current=null; };
+
+  // Capture Android install prompt
+  useEffect(()=>{
+    const handler=e=>{
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstallBanner(true);
+    };
+    window.addEventListener("beforeinstallprompt",handler);
+    return()=>window.removeEventListener("beforeinstallprompt",handler);
+  },[]);
 
   useEffect(()=>{ loadData().then(d=>{
     if(d){ setData(d); if(d.lang)setLang(d.lang); if(d.cur)setCur(d.cur); }
@@ -1812,6 +1883,7 @@ export default function App(){
       `}</style>
 
       <ConfirmModal config={confirmCfg} t={t} onOk={handleConfirmOk} onCancel={handleConfirmCancel}/>
+      {shareModal&&<ShareModal url={shareModal.url} title={shareModal.title} onClose={()=>setShareModal(null)}/>}
       {calcOpen&&<StakeCalculator bankroll={bankroll} cur={cur} t={t} onClose={()=>setCalcOpen(false)}/>}
       {showPin&&<PinModal t={t} onSuccess={checkPin} onCancel={()=>{setShowPin(false);setPendingPage(null);}}/>}
       <Toast msg={toast.msg} type={toast.type} onClose={closeToast}/>
@@ -1853,6 +1925,31 @@ export default function App(){
         </div>
       </nav>
 
+      {/* Android install banner */}
+      {showInstallBanner&&installPrompt&&(
+        <div style={{background:"rgba(6,182,212,.1)",borderBottom:`1px solid rgba(6,182,212,.3)`,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:20}}>📲</span>
+            <div>
+              <div style={{color:"#38bdf8",fontWeight:700,fontSize:13}}>Installer MorganbetBK</div>
+              <div style={{color:"#4d6680",fontSize:11}}>Accès rapide + notifications</div>
+            </div>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={async()=>{
+              if(!installPrompt)return;
+              installPrompt.prompt();
+              const result=await installPrompt.userChoice;
+              if(result.outcome==="accepted"){showToast("App installée ! 🎉","success");}
+              setInstallPrompt(null); setShowInstallBanner(false);
+            }} style={{padding:"7px 14px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#38bdf8,#0284c7)",color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>
+              Installer
+            </button>
+            <button onClick={()=>setShowInstallBanner(false)} style={{padding:"7px 10px",borderRadius:9,border:`1px solid rgba(255,255,255,.1)`,background:"transparent",color:"#4d6680",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>✕</button>
+          </div>
+        </div>
+      )}
+
       {/* Notif prompt banner */}
       {showNotifPrompt&&!notifGranted&&page==="dashboard"&&(
         <div style={{background:"rgba(245,158,11,.1)",borderBottom:`1px solid ${C.goldBorder}`,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
@@ -1873,9 +1970,9 @@ export default function App(){
         {page==="dashboard"&&<Dashboard bankroll={bankroll} initialBankroll={data?.bankroll?.initial||bankroll} bets={bets} isAdmin={isAdmin} onPage={navTo} onStatus={handleStatus} onDelete={handleDelete} onDuplicate={handleDuplicate} cur={cur} t={t} onCalc={()=>setCalcOpen(true)} goal={goalEur} onSetGoal={handleSetGoal}/>}
         {page==="newbet"&&(isAdmin?<NewBet bankroll={bankroll} onAdd={handleAddBet} onBack={()=>setPage("dashboard")} showToast={showToast} t={t} lang={lang} bets={bets}/>:<AccessDenied/>)}
         {page==="history"&&<History bets={bets} isAdmin={isAdmin} onStatus={handleStatus} onDelete={handleDelete} onDuplicate={handleDuplicate} cur={cur} t={t}/>}
-        {page==="stats"&&<Stats bets={bets} bankroll={bankroll} initialBankroll={data?.bankroll?.initial||bankroll} cur={cur} t={t}/>}
+        {page==="stats"&&<Stats bets={bets} bankroll={bankroll} initialBankroll={data?.bankroll?.initial||bankroll} cur={cur} t={t} onShare={url=>setShareModal({url,title:"MorganbetBK — Mes statistiques"})}/>}
         {page==="bilan"&&<Bilan bets={bets} cur={cur} t={t}/>}
-        {page==="settings"&&(isAdmin?<Settings bankroll={bankroll} onUpdateBankroll={handleUpdateBankroll} onResetRequest={handleResetRequest} onChangePin={p=>persist({...data,pin:p})} cur={cur} onCurChange={handleCurChange} lang={lang} onLangChange={handleLangChange} lightMode={lightMode} onToggleLight={toggleLight} onExport={handleExportExcel} notifGranted={notifGranted} setNotifGranted={setNotifGranted} showToast={showToast} t={t}/>:<AccessDenied/>)}
+        {page==="settings"&&(isAdmin?<Settings bankroll={bankroll} onUpdateBankroll={handleUpdateBankroll} onResetRequest={handleResetRequest} onChangePin={p=>persist({...data,pin:p})} cur={cur} onCurChange={handleCurChange} lang={lang} onLangChange={handleLangChange} lightMode={lightMode} onToggleLight={toggleLight} onExport={handleExportExcel} onShare={url=>setShareModal({url,title:"MorganbetBK"})} notifGranted={notifGranted} setNotifGranted={setNotifGranted} showToast={showToast} t={t}/>:<AccessDenied/>)}
       </main>
 
       {/* Floating add button - mobile only */}
